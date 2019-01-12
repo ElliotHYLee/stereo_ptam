@@ -13,7 +13,6 @@ from motion import MotionModel
 from loopclosing import LoopClosing
 
 
-
 class Tracking(object):
     def __init__(self, params):
         self.optimizer = BundleAdjustment()
@@ -23,7 +22,7 @@ class Tracking(object):
     def refine_pose(self, pose, cam, measurements):
         assert len(measurements) >= self.min_measurements, (
             'Not enough points')
-            
+
         self.optimizer.clear()
         self.optimizer.add_pose(0, pose, cam, fixed=False)
 
@@ -48,12 +47,12 @@ class SPTAM(object):
 
         self.loop_closing = LoopClosing(self, params)
         self.loop_correction = None
-        
+
         self.reference = None        # reference keyframe
         self.preceding = None        # last keyframe
         self.current = None          # current frame
         self.status = defaultdict(bool)
-        
+
     def stop(self):
         self.mapping.stop()
         if self.loop_closing is not None:
@@ -61,8 +60,7 @@ class SPTAM(object):
 
     def initialize(self, frame):
         mappoints, measurements = frame.triangulate()
-        assert len(mappoints) >= self.params.init_min_points, (
-            'Not enough points to initialize map.')
+        assert len(mappoints) >= self.params.init_min_points, ('Not enough points to initialize map.')
 
         keyframe = frame.to_keyframe()
         keyframe.set_fixed(True)
@@ -112,7 +110,7 @@ class SPTAM(object):
             mappoint.update_descriptor(m.get_descriptor())
             mappoint.increase_measurement_count()
             tracked_map.add(mappoint)
-        
+
         try:
             self.reference = self.graph.get_reference_frame(tracked_map)
 
@@ -140,14 +138,13 @@ class SPTAM(object):
 
 
     def filter_points(self, frame):
-        local_mappoints = self.graph.get_local_map_v2(
-            [self.preceding, self.reference])[0]
+        local_mappoints = self.graph.get_local_map_v2([self.preceding, self.reference])[0]
 
         can_view = frame.can_view(local_mappoints)
-        print('filter points:', len(local_mappoints), can_view.sum(), 
+        print('filter points:', len(local_mappoints), can_view.sum(),
             len(self.preceding.mappoints()),
             len(self.reference.mappoints()))
-        
+
         checked = set()
         filtered = []
         for i in np.where(can_view)[0]:
@@ -177,8 +174,7 @@ class SPTAM(object):
 
         print('keyframe check:', n_matches, '   ', n_matches_ref)
 
-        return ((n_matches / n_matches_ref) < 
-            self.params.min_tracked_points_ratio) or n_matches < 20
+        return ((n_matches / n_matches_ref) < self.params.min_tracked_points_ratio) or n_matches < 20
 
 
     def set_loop_correction(self, T):
@@ -212,9 +208,6 @@ class SPTAM(object):
         return self.status['adding_keyframes_stopped']
 
 
-
-
-
 if __name__ == '__main__':
     import cv2
     import g2o
@@ -224,20 +217,18 @@ if __name__ == '__main__':
     import argparse
 
     from threading import Thread
-    
+
     from components import Camera
     from components import StereoFrame
     from feature import ImageFeature
     from params import ParamsKITTI, ParamsEuroc
     from dataset import KITTIOdometry, EuRoCDataset
-    
+
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--no-viz', action='store_true', help='do not visualize')
-    parser.add_argument('--dataset', type=str, help='dataset (KITTI/EuRoC)', 
-        default='KITTI')
-    parser.add_argument('--path', type=str, help='dataset path', 
-        default='path/to/your/KITTI_odometry/sequences/00')
+    parser.add_argument('--dataset', type=str, help='dataset (KITTI/EuRoC)', default='KITTI')
+    parser.add_argument('--path', type=str, help='dataset path', default='path/to/your/KITTI_odometry/sequences/00')
     args = parser.parse_args()
 
     if args.dataset.lower() == 'kitti':
@@ -256,26 +247,24 @@ if __name__ == '__main__':
 
 
     cam = Camera(
-        dataset.cam.fx, dataset.cam.fy, dataset.cam.cx, dataset.cam.cy, 
-        dataset.cam.width, dataset.cam.height, 
-        params.frustum_near, params.frustum_far, 
+        dataset.cam.fx, dataset.cam.fy, dataset.cam.cx, dataset.cam.cy,
+        dataset.cam.width, dataset.cam.height,
+        params.frustum_near, params.frustum_far,
         dataset.cam.baseline)
 
-
-
     durations = []
-    for i in range(len(dataset))[:100]:
+    for i in range(len(dataset))[:3000]:
         featurel = ImageFeature(dataset.left[i], params)
         featurer = ImageFeature(dataset.right[i], params)
         timestamp = dataset.timestamps[i]
 
-        time_start = time.time()  
+        time_start = time.time()
 
         t = Thread(target=featurer.extract)
         t.start()
         featurel.extract()
         t.join()
-        
+
         frame = StereoFrame(i, g2o.Isometry3d(), featurel, featurer, cam, timestamp=timestamp)
 
         if not sptam.is_initialized():
@@ -289,7 +278,7 @@ if __name__ == '__main__':
         print('duration', duration)
         print()
         print()
-        
+
         if visualize:
             viewer.update()
 

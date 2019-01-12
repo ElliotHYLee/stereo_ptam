@@ -30,7 +30,7 @@ class ImageReader(object):
             return img
         else:
             return self.cam.rectify(img)
-        
+
     def preload(self):
         idx = self.idx
         t = float('inf')
@@ -40,7 +40,7 @@ class ImageReader(object):
             if self.idx == idx:
                 time.sleep(1e-2)
                 continue
-            
+
             for i in range(self.idx, self.idx + self.ahead):
                 if i not in self.cache and i < len(self.ids):
                     self.cache[i] = self.read(self.ids[i])
@@ -48,7 +48,7 @@ class ImageReader(object):
                 return
             idx = self.idx
             t = time.time()
-    
+
     def __len__(self):
         return len(self.ids)
 
@@ -61,7 +61,7 @@ class ImageReader(object):
         if idx in self.cache:
             img = self.cache[idx]
             del self.cache[idx]
-        else:   
+        else:
             img = self.read(self.ids[idx])
         return img
 
@@ -91,9 +91,9 @@ class KITTIOdometry(object):   # without lidar
 
         path = os.path.expanduser(path)
         timestamps = np.loadtxt(os.path.join(path, 'times.txt'))
-        self.left = ImageReader(self.listdir(os.path.join(path, 'image_2')), 
+        self.left = ImageReader(self.listdir(os.path.join(path, 'image_2')),
             timestamps)
-        self.right = ImageReader(self.listdir(os.path.join(path, 'image_3')), 
+        self.right = ImageReader(self.listdir(os.path.join(path, 'image_3')),
             timestamps)
 
         assert len(self.left) == len(self.right)
@@ -123,9 +123,9 @@ class KITTIOdometry(object):   # without lidar
 
 
 class Camera(object):
-    def __init__(self, 
+    def __init__(self,
             width, height,
-            intrinsic_matrix, 
+            intrinsic_matrix,
             undistort_rectify=False,
             extrinsic_matrix=None,
             distortion_coeffs=None,
@@ -175,10 +175,8 @@ class StereoCamera(object):
         self.fy = left_cam.fy
         self.cx = left_cam.cx
         self.cy = left_cam.cy
-        self.baseline = abs(right_cam.projection_matrix[0, 3] / 
-            right_cam.projection_matrix[0, 0])
+        self.baseline = abs(right_cam.projection_matrix[0, 3] / right_cam.projection_matrix[0, 0])
         self.focal_baseline = self.fx * self.baseline
-
 
 class EuRoCDataset(object):   # Stereo + IMU
     '''
@@ -188,8 +186,8 @@ class EuRoCDataset(object):   # Stereo + IMU
         self.left_cam = Camera(
             width=752, height=480,
             intrinsic_matrix = np.array([
-                [458.654, 0.000000, 367.215], 
-                [0.000000, 457.296, 248.375], 
+                [458.654, 0.000000, 367.215],
+                [0.000000, 457.296, 248.375],
                 [0.000000, 0.000000, 1.000000]]),
             undistort_rectify=rectify,
             distortion_coeffs = np.array(
@@ -207,12 +205,12 @@ class EuRoCDataset(object):   # Stereo + IMU
                 [0.999557249008, 0.0149672133247, 0.025715529948, -0.064676986768],
                 [-0.0257744366974, 0.00375618835797, 0.999660727178, 0.00981073058949],
                 [0.0, 0.0, 0.0, 1.0]])
-        )  
+        )
         self.right_cam = Camera(
             width=752, height=480,
             intrinsic_matrix = np.array([
-                [457.587, 0.000000, 379.999], 
-                [0.000000, 456.134, 255.238], 
+                [457.587, 0.000000, 379.999],
+                [0.000000, 456.134, 255.238],
                 [0.000000, 0.000000, 1.000000]]),
             undistort_rectify=rectify,
             distortion_coeffs = np.array(
@@ -230,14 +228,16 @@ class EuRoCDataset(object):   # Stereo + IMU
                 [0.999598781151, 0.0130119051815, 0.0251588363115, 0.0453689425024],
                 [-0.0253898008918, 0.0179005838253, 0.999517347078, 0.00786212447038],
                 [0.0, 0.0, 0.0, 1.0]])
-        ) 
-        
+        )
+
         path = os.path.expanduser(path)
         self.left = ImageReader(
-            *self.list_imgs(os.path.join(path, 'mav0', 'cam0', 'data')), 
+            #*self.list_imgs(os.path.join(path, 'mav0', 'cam0', 'data')),
+            *self.list_imgs(os.path.join(path, 'cam0', 'data')),
             self.left_cam)
         self.right = ImageReader(
-            *self.list_imgs(os.path.join(path, 'mav0', 'cam1', 'data')), 
+            #*self.list_imgs(os.path.join(path, 'mav0', 'cam1', 'data')),
+            *self.list_imgs(os.path.join(path, 'cam1', 'data')),
             self.right_cam)
         assert len(self.left) == len(self.right)
         self.timestamps = self.left.timestamps
