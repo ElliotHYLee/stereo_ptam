@@ -4,7 +4,7 @@ import os
 from Dataset.ImageReader import ImageReader
 
 
-class StereoCamera(object):
+class EuRocStereoCamera(object):
     def __init__(self, left_cam, right_cam):
         self.left_cam = left_cam
         self.right_cam = right_cam
@@ -21,7 +21,7 @@ class StereoCamera(object):
         self.focal_baseline = self.fx * self.baseline
 
 
-class Camera(object):
+class EuRocCamera(object):
     def __init__(self,
             width, height,
             intrinsic_matrix,
@@ -66,7 +66,7 @@ class EuRoCDataset(object):   # Stereo + IMU
     path example: 'path/to/your/EuRoC Mav dataset/MH_01_easy'
     '''
     def __init__(self, path, rectify=True):
-        self.left_cam = Camera(
+        self.left_cam = EuRocCamera(
             width=752, height=480,
             intrinsic_matrix = np.array([
                 [458.654, 0.000000, 367.215],
@@ -89,7 +89,7 @@ class EuRoCDataset(object):   # Stereo + IMU
                 [-0.0257744366974, 0.00375618835797, 0.999660727178, 0.00981073058949],
                 [0.0, 0.0, 0.0, 1.0]])
         )
-        self.right_cam = Camera(
+        self.right_cam = EuRocCamera(
             width=752, height=480,
             intrinsic_matrix = np.array([
                 [457.587, 0.000000, 379.999],
@@ -125,7 +125,7 @@ class EuRoCDataset(object):   # Stereo + IMU
         assert len(self.left) == len(self.right)
         self.timestamps = self.left.timestamps
 
-        self.cam = StereoCamera(self.left_cam, self.right_cam)
+        self.cam = EuRocStereoCamera(self.left_cam, self.right_cam)
 
     def list_imgs(self, dir):
         xs = [_ for _ in os.listdir(dir) if _.endswith('.png')]
