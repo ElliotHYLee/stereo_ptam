@@ -8,10 +8,9 @@ from collections import defaultdict
 # custom libs
 from Covisibility.CovisibilityGraph import CovisibilityGraph
 from Optimization.BundleAdjustment import BundleAdjustment
-from mapping import Mapping
-from mapping import MappingThread
+from Mapping.mapping import Mapping, MappingThread
 from Components.Measurement import Measurement
-from motion import MotionModel
+from Motion.motion import MotionModel
 from LoopClosure.LoopClosing import LoopClosing
 
 

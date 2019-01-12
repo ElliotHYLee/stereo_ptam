@@ -1,24 +1,18 @@
 from sptam import *
-
+import cv2
+import g2o
+import os
+import sys
+import argparse
+from threading import Thread
+from Components.Camera import Camera
+from Components.StereoFrame import StereoFrame
+from Feature.feature import ImageFeature
+from Params.params import ParamsKITTI, ParamsEuroc
+from Dataset.KITTIOdometry import KITTIOdometry
+from Dataset.EuRoCDataset import EuRoCDataset
 
 if __name__ == '__main__':
-    import cv2
-    import g2o
-
-    import os
-    import sys
-    import argparse
-
-    from threading import Thread
-
-    from Components.Camera import Camera
-    from Components.StereoFrame import StereoFrame
-
-    from Feature.feature import ImageFeature
-    from params import ParamsKITTI, ParamsEuroc
-    from dataset import KITTIOdometry, EuRoCDataset
-
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--no-viz', action='store_true', help='do not visualize')
     parser.add_argument('--dataset', type=str, help='dataset (KITTI/EuRoC)', default='KITTI')
@@ -36,7 +30,7 @@ if __name__ == '__main__':
 
     visualize = not args.no_viz
     if visualize:
-        from viewer import MapViewer
+        from Viewer.viewer import MapViewer
         viewer = MapViewer(sptam, params)
 
     cam = Camera(

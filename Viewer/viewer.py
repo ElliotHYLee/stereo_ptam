@@ -24,7 +24,7 @@ class DynamicArray(object):
 
     def append(self, x):
         self.extend([x])
-    
+
     def extend(self, xs):
         if len(xs) == 0:
             return
@@ -91,7 +91,7 @@ class MapViewer(object):
         points = []
         for m in self.system.reference.measurements():
             if m.from_triangulation():
-                points.append(m.mappoint.position) 
+                points.append(m.mappoint.position)
         self.q_active.put(points)
 
         lines = []
@@ -104,7 +104,7 @@ class MapViewer(object):
                 lines.append(([*kf.position, *kf.loop_keyframe.position], 2))
         self.q_graph.put(lines)
 
-        
+
         if refresh:
             print('****************************************************************', 'refresh')
             cameras = []
@@ -171,7 +171,7 @@ class MapViewer(object):
 
         # button
         m_replay = pangolin.VarBool('menu.Replay', value=False, toggle=False)
-        m_refresh = pangolin.VarBool('menu.Refresh', False, False)  
+        m_refresh = pangolin.VarBool('menu.Refresh', False, False)
         m_reset = pangolin.VarBool('menu.Reset', False, False)
 
         if self.config is None:
@@ -317,13 +317,13 @@ class MapViewer(object):
                 if len(cams) > 20:
                     cameras.clear()
                 cameras.extend(cams)
-                
+
             if m_show_keyframes.Get():
                 gl.glLineWidth(1)
                 gl.glColor3f(0.0, 0.0, 1.0)
                 pangolin.DrawCameras(cameras.array(), camera_width)
 
-            
+
             # show image
             if not self.q_image.empty():
                 image = self.q_image.get()
@@ -332,7 +332,7 @@ class MapViewer(object):
                 else:
                     image = np.repeat(image[::-1, :, np.newaxis], 3, axis=2)
                 image = cv2.resize(image, (width, height))
-            if m_show_image.Get():         
+            if m_show_image.Get():
                 texture.Upload(image, gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
                 dimg.Activate()
                 gl.glColor3f(1.0, 1.0, 1.0)
@@ -352,7 +352,7 @@ class MapViewer(object):
 
             if pangolin.Pushed(m_refresh):
                 self.q_refresh.put(True)
-            
+
 
 
             pangolin.FinishFrame()
