@@ -4,15 +4,13 @@ import cv2
 from collections import defaultdict
 from numbers import Number
 
-from threading import Thread, Lock 
+from threading import Thread, Lock
 from queue import Queue
-
-
 
 class ImageFeature(object):
     def __init__(self, image, params):
         # TODO: pyramid representation
-        self.image = image 
+        self.image = image
         self.height, self.width = image.shape[:2]
 
         self.keypoints = []      # list of cv2.KeyPoint
@@ -24,9 +22,7 @@ class ImageFeature(object):
 
         self.cell_size = params.matching_cell_size
         self.distance = params.matching_distance
-        self.neighborhood = (
-            params.matching_cell_size * params.matching_neighborhood)
-
+        self.neighborhood = (params.matching_cell_size * params.matching_neighborhood)
         self._lock = Lock()
 
     def extract(self):
@@ -69,7 +65,7 @@ class ImageFeature(object):
             if len(unmatched_descriptors) == 0:
                 return []
             lookup = dict(zip(
-                range(len(unmatched_descriptors)), 
+                range(len(unmatched_descriptors)),
                 np.where(self.unmatched)[0]))
 
         # TODO: reduce matched points by using predicted position
@@ -117,8 +113,8 @@ class ImageFeature(object):
 
 # TODO: only match points in neighboring rows
 def row_match(matcher, kps1, desps1, kps2, desps2,
-        matching_distance=40, 
-        max_row_distance=2.5, 
+        matching_distance=40,
+        max_row_distance=2.5,
         max_disparity=100):
 
     matches = matcher.match(np.array(desps1), np.array(desps2))
@@ -126,19 +122,17 @@ def row_match(matcher, kps1, desps1, kps2, desps2,
     for m in matches:
         pt1 = kps1[m.queryIdx].pt
         pt2 = kps2[m.trainIdx].pt
-        if (m.distance < matching_distance and 
-            abs(pt1[1] - pt2[1]) < max_row_distance and 
+        if (m.distance < matching_distance and
+            abs(pt1[1] - pt2[1]) < max_row_distance and
             abs(pt1[0] - pt2[0]) < max_disparity):   # epipolar constraint
             good.append(m)
     return good
-    
-
 
 def circular_stereo_match(
-        matcher, 
+        matcher,
         desps1, desps2, matches12,
         desps3, desps4, matches34,
-        matching_distance=30, 
+        matching_distance=30,
         min_matches=10, ratio=0.8):
 
     dict_m13 = dict()
@@ -153,7 +147,7 @@ def circular_stereo_match(
     # to avoid unnecessary computation
     if len(dict_m13) < min_matches:
         return []
-                
+
     ms24 = matcher.knnMatch(np.array(desps2), np.array(desps4), k=2)
     for (m, n) in ms24:
         if m.distance < min(matching_distance, n.distance * ratio):
@@ -166,7 +160,7 @@ def circular_stereo_match(
 
         if shared13 is not None and shared24 is not None:
             shared34 = dict_m34.get(shared13.trainIdx, None)
-            if (shared34 is not None and 
+            if (shared34 is not None and
                 shared34.trainIdx == shared24.trainIdx):
                 matches.append((shared13, shared24))
     return matches

@@ -7,8 +7,8 @@ import time
 from itertools import chain
 from collections import defaultdict
 
-from optimization import LocalBA
-from components import Measurement
+from Optimization.BundleAdjustment import LocalBA
+from Components.Measurement import Measurement
 
 
 
@@ -38,7 +38,7 @@ class Mapping(object):
 
     def fill(self, keyframes, keyframe):
         covisible = sorted(
-            keyframe.covisibility_keyframes().items(), 
+            keyframe.covisibility_keyframes().items(),
             key=lambda _:_[1], reverse=True)
 
         for kf, n in covisible:
@@ -66,7 +66,7 @@ class Mapping(object):
         fixed_keyframes = set()
         for kf in adjust_keyframes:
             for ck, n in kf.covisibility_keyframes().items():
-                if (n > 0 and ck not in adjust_keyframes 
+                if (n > 0 and ck not in adjust_keyframes
                     and self.is_safe(ck) and ck < kf):
                     fixed_keyframes.add(ck)
 
@@ -94,7 +94,7 @@ class Mapping(object):
         filtered = []
         for i in np.where(keyframe.can_view(mappoints))[0]:
             pt = mappoints[i]
-            if (not pt.is_bad() and 
+            if (not pt.is_bad() and
                 not self.graph.has_measurement(keyframe, pt)):
                 filtered.append(pt)
         return filtered
@@ -139,12 +139,12 @@ class MappingThread(Mapping):
         self._lock = Lock()
         self.locked_window = set()
         self.status = defaultdict(bool)
-        
+
         self._queue = Queue()
         self.maintenance_thread = Thread(target=self.maintenance)
         self.maintenance_thread.start()
 
-    def add_keyframe(self, keyframe, measurements): 
+    def add_keyframe(self, keyframe, measurements):
         self.graph.add_keyframe(keyframe)
 
         self.create_points(keyframe)
@@ -154,7 +154,7 @@ class MappingThread(Mapping):
         self._queue.put(keyframe)
         with self._requests_cv:
             self._requests_cv.notify()
-        
+
     def maintenance(self):
         stopped = False
         while not stopped:

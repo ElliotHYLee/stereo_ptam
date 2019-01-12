@@ -2,12 +2,9 @@ import numpy as np
 import cv2
 import os
 import time
-
 from collections import defaultdict, namedtuple
-
 from threading import Thread, Lock
 from multiprocessing import Process, Queue
-
 
 
 class ImageReader(object):
@@ -76,9 +73,6 @@ class ImageReader(object):
     def shape(self):
         return self[0].shape
 
-
-
-
 class KITTIOdometry(object):   # without lidar
     '''
     path example: 'path/to/your/KITTI odometry dataset/sequences/00'
@@ -116,11 +110,6 @@ class KITTIOdometry(object):   # without lidar
 
     def __len__(self):
         return len(self.left)
-
-
-
-
-
 
 class Camera(object):
     def __init__(self,

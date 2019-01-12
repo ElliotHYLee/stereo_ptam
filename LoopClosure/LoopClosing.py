@@ -1,52 +1,18 @@
+# pip libs
 import numpy as np
 import cv2
-
 import g2o
 from g2o.contrib import SmoothEstimatePropagator
-
 import time
 from threading import Thread, Lock
 from queue import Queue
-
 from collections import defaultdict, namedtuple
 
-from optimization import PoseGraphOptimization
-from components import Measurement
-
-
-
-# a very simple implementation
-class LoopDetection(object):
-    def __init__(self, params):
-        self.params = params
-        self.nns = NearestNeighbors()
-
-    def add_keyframe(self, keyframe):
-        embedding = keyframe.feature.descriptors.mean(axis=0)
-        self.nns.add_item(embedding, keyframe)
-
-    def detect(self, keyframe):
-        embedding = keyframe.feature.descriptors.mean(axis=0)
-        kfs, ds = self.nns.search(embedding, k=20)
-
-        if len(kfs) > 0 and kfs[0] == keyframe:
-            kfs, ds = kfs[1:], ds[1:]
-        if len(kfs) == 0:
-            return None
-
-        min_d = np.min(ds)
-        for kf, d in zip(kfs, ds):
-            if abs(kf.id - keyframe.id) < self.params.lc_min_inbetween_frames:
-                continue
-            if (np.linalg.norm(kf.position - keyframe.position) > 
-                self.params.lc_max_inbetween_distance):
-                break
-            if d > self.params.lc_embedding_distance or d > min_d * 1.5:
-                break
-            return kf
-        return None
-
-
+# custom libs
+from Optimization.PoseGraphOptimization import PoseGraphOptimization
+from Components.Measurement import Measurement
+from LoopClosure.NearestNeighbors import NearestNeighbors
+from LoopClosure.LoopDetection import LoopDetection
 
 class LoopClosing(object):
     def __init__(self, system, params):
@@ -86,12 +52,12 @@ class LoopClosing(object):
 
             # check if this keyframe share many mappoints with a loop keyframe
             covisible = sorted(
-                keyframe.covisibility_keyframes().items(), 
+                keyframe.covisibility_keyframes().items(),
                 key=lambda _:_[1], reverse=True)
             if any([(keyframe.id - _[0].id) > 5 for _ in covisible[:2]]):
                 continue
 
-            if (last_query_keyframe is not None and 
+            if (last_query_keyframe is not None and
                 abs(last_query_keyframe.id - keyframe.id) < 3):
                 continue
 
@@ -107,7 +73,7 @@ class LoopClosing(object):
 
             if result is None:
                 continue
-            if (result.n_inliers < max(self.params.lc_inliers_threshold, 
+            if (result.n_inliers < max(self.params.lc_inliers_threshold,
                 result.n_matches * self.params.lc_inliers_ratio)):
                 continue
 
@@ -121,15 +87,15 @@ class LoopClosing(object):
                 (match_keyframe, query_keyframe, result.constraint))
             query_keyframe.set_loop(match_keyframe, result.constraint)
 
-            # We have to ensure that the mapping thread is on a safe part of code, 
+            # We have to ensure that the mapping thread is on a safe part of code,
             # before the selection of KFs to optimize
             safe_window = self.system.mapping.lock_window()
             safe_window.add(self.system.reference)
             for kf in self.system.reference.covisibility_keyframes():
                 safe_window.add(kf)
 
-            
-            # The safe window established between the Local Mapping must be 
+
+            # The safe window established between the Local Mapping must be
             # inside the considered KFs.
             considered_keyframes = self.system.graph.keyframes()
 
@@ -138,7 +104,7 @@ class LoopClosing(object):
             before_lc = [
                 g2o.Isometry3d(kf.orientation, kf.position) for kf in safe_window]
 
-            # Propagate initial estimate through 10% of total keyframes 
+            # Propagate initial estimate through 10% of total keyframes
             # (or at least 20 keyframes)
             d = max(20, len(considered_keyframes) * 0.1)
             propagator = SmoothEstimatePropagator(self.optimizer, d)
@@ -146,7 +112,7 @@ class LoopClosing(object):
 
             # self.optimizer.set_verbose(True)
             self.optimizer.optimize(20)
-            
+
             # Exclude KFs that may being use by the local BA.
             self.optimizer.update_poses_and_points(
                 considered_keyframes, exclude=safe_window)
@@ -173,7 +139,7 @@ class LoopClosing(object):
                     reference = keyframe
                     break
             uncorrected = g2o.Isometry3d(
-                reference.orientation, 
+                reference.orientation,
                 reference.position)
             corrected = self.optimizer.vertex(reference.id).estimate()
             T = uncorrected.inverse() * corrected   # close to result.correction
@@ -191,7 +157,7 @@ class LoopClosing(object):
             keyframes = self.system.graph.keyframes()
             if len(keyframes) > len(considered_keyframes):
                 self.optimizer.update_poses_and_points(
-                    keyframes[len(considered_keyframes) - len(keyframes):], 
+                    keyframes[len(considered_keyframes) - len(keyframes):],
                     correction=T)
 
             for m13, _ in result.stereo_matches:
@@ -205,7 +171,7 @@ class LoopClosing(object):
                     query_meas.get_descriptors())
                 self.system.graph.add_measurement(
                     query_keyframe, match_meas.mappoint, new_query_meas)
-                
+
                 new_match_meas = Measurement(
                     Measurement.Type.STEREO,
                     Measurement.Source.REFIND,
@@ -223,7 +189,7 @@ class LoopClosing(object):
                 if keyframe is None:
                     return
             last_query_keyframe = query_keyframe
-        
+
 
 
 def match_and_estimate(query_keyframe, match_keyframe, params):
@@ -293,51 +259,19 @@ def match_and_estimate(query_keyframe, match_keyframe, params):
     correction = query_pose.inverse() * estimated_pose
 
     return namedtuple('MatchEstimateResult',
-        ['estimated_pose', 'constraint', 'correction', 'query_stereo_measurements', 
+        ['estimated_pose', 'constraint', 'correction', 'query_stereo_measurements',
         'match_stereo_measurements', 'stereo_matches', 'n_matches', 'n_inliers'])(
-        estimated_pose, constraint, correction, query['measurements'], 
+        estimated_pose, constraint, correction, query['measurements'],
         match['measurements'], stereo_matches, n_matches, n_inliers)
 
 
 def solve_pnp_ransac(pts3d, pts, intrinsic_matrix):
     val, rvec, tvec, inliers = cv2.solvePnPRansac(
-            np.array(pts3d), np.array(pts), 
-            intrinsic_matrix, None, None, None, 
+            np.array(pts3d), np.array(pts),
+            intrinsic_matrix, None, None, None,
             False, 50, 2.0, 0.99, None)
     if inliers is None or len(inliers) < 5:
         return None, None
 
     T = g2o.Isometry3d(cv2.Rodrigues(rvec)[0], tvec)
     return T, inliers.ravel()
-    
-
-
-class NearestNeighbors(object):
-    def __init__(self, dim=None):
-        self.n = 0
-        self.dim = dim
-        self.items = dict()
-        self.data = []
-        if dim is not None:
-            self.data = np.zeros((1000, dim), dtype='float32')
-
-    def add_item(self, vector, item):
-        assert vector.ndim == 1
-        if self.n >= len(self.data):
-            if self.dim is None:
-                self.dim = len(vector)
-                self.data = np.zeros((1000, self.dim), dtype='float32')
-            else:
-                self.data.resize(
-                    (2 * len(self.data), self.dim) , refcheck=False)
-        self.items[self.n] = item
-        self.data[self.n] = vector
-        self.n += 1
-
-    def search(self, query, k):  # searching from 100000 items consume 30ms
-        if len(self.data) == 0:
-            return [], []
-
-        ds = np.linalg.norm(query[np.newaxis, :] - self.data[:self.n], axis=1)
-        ns = np.argsort(ds)[:k]
-        return [self.items[n] for n in ns], ds[ns]

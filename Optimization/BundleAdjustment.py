@@ -1,13 +1,16 @@
+# pip libs
 import numpy as np
 import g2o
 
+# custom libs
+from Optimization.PoseGraphOptimization import PoseGraphOptimization
 
 
 class BundleAdjustment(g2o.SparseOptimizer):
     def __init__(self, ):
         super().__init__()
 
-        # Higher confident (better than CHOLMOD, according to 
+        # Higher confident (better than CHOLMOD, according to
         # paper "3-D Mapping With an RGB-D Camera")
         solver = g2o.BlockSolverSE3(g2o.LinearSolverCSparseSE3())
         solver = g2o.OptimizationAlgorithmLevenberg(solver)
@@ -19,7 +22,7 @@ class BundleAdjustment(g2o.SparseOptimizer):
         super().add_post_iteration_action(terminate)
 
         # Robust cost Function (Huber function) delta
-        self.delta = np.sqrt(5.991)   
+        self.delta = np.sqrt(5.991)
         self.aborted = False
 
     def optimize(self, max_iterations=10):
@@ -40,7 +43,7 @@ class BundleAdjustment(g2o.SparseOptimizer):
         v_se3.set_id(pose_id * 2)
         v_se3.set_estimate(sbacam)
         v_se3.set_fixed(fixed)
-        super().add_vertex(v_se3) 
+        super().add_vertex(v_se3)
 
     def add_point(self, point_id, point, fixed=False, marginalized=True):
         v_p = g2o.VertexSBAPointXYZ()
@@ -71,14 +74,14 @@ class BundleAdjustment(g2o.SparseOptimizer):
         e.set_information(information)
         return e
 
-    def mono_edge(self, projection, 
+    def mono_edge(self, projection,
             information=np.identity(2) * 0.5):
         e = g2o.EdgeProjectP2MC()
         e.set_measurement(projection)
         e.set_information(information)
         return e
 
-    def mono_edge_right(self, projection, 
+    def mono_edge_right(self, projection,
             information=np.identity(2) * 0.5):
         e = g2o.EdgeProjectP2MCRight()
         e.set_measurement(projection)
@@ -93,8 +96,6 @@ class BundleAdjustment(g2o.SparseOptimizer):
 
     def abort(self):
         self.aborted = True
-
-
 
 class LocalBA(object):
     def __init__(self, ):
@@ -158,106 +159,3 @@ class LocalBA(object):
 
     def optimize(self, max_iterations):
         return self.optimizer.optimize(max_iterations)
-
-
-
-
-class PoseGraphOptimization(g2o.SparseOptimizer):
-    def __init__(self):
-        super().__init__()
-        solver = g2o.BlockSolverSE3(g2o.LinearSolverCholmodSE3())
-        solver = g2o.OptimizationAlgorithmLevenberg(solver)
-        super().set_algorithm(solver)
-
-    def optimize(self, max_iterations=20):
-        super().initialize_optimization()
-        super().optimize(max_iterations)
-
-    def add_vertex(self, id, pose, fixed=False):
-        v_se3 = g2o.VertexSE3()
-        v_se3.set_id(id)
-        v_se3.set_estimate(pose)
-        v_se3.set_fixed(fixed)
-        super().add_vertex(v_se3)
-
-    def add_edge(self, vertices, 
-            measurement=None, 
-            information=np.identity(6),
-            robust_kernel=None):
-
-        edge = g2o.EdgeSE3()
-        for i, v in enumerate(vertices):
-            if isinstance(v, int):
-                v = self.vertex(v)
-            edge.set_vertex(i, v)
-
-        if measurement is None:
-            measurement = (
-                edge.vertex(0).estimate().inverse() * 
-                edge.vertex(1).estimate())
-        edge.set_measurement(measurement)
-        edge.set_information(information)
-        if robust_kernel is not None:
-            edge.set_robust_kernel(robust_kernel)
-        super().add_edge(edge)
-
-
-    def set_data(self, keyframes, loops):
-        super().clear()
-        anchor=None
-        for kf, *_ in loops:
-            if anchor is None or kf < anchor:
-                anchor = kf
-
-        for i, kf in enumerate(keyframes):
-            pose = g2o.Isometry3d(
-                kf.orientation,
-                kf.position)
-            
-            fixed = i == 0
-            if anchor is not None:
-                fixed = kf <= anchor
-            self.add_vertex(kf.id, pose, fixed=fixed)
-
-            if kf.preceding_keyframe is not None:
-                self.add_edge(
-                    vertices=(kf.preceding_keyframe.id, kf.id),
-                    measurement=kf.preceding_constraint)
-
-            if (kf.reference_keyframe is not None and
-                kf.reference_keyframe != kf.preceding_keyframe):
-                self.add_edge(
-                    vertices=(kf.reference_keyframe.id, kf.id),
-                    measurement=kf.reference_constraint)
-        
-        for kf, kf2, meas in loops:
-            self.add_edge((kf.id, kf2.id), measurement=meas)
-
-
-    def update_poses_and_points(
-            self, keyframes, correction=None, exclude=set()):
-
-        for kf in keyframes:
-            if len(exclude) > 0 and kf in exclude:
-                continue
-            uncorrected = g2o.Isometry3d(kf.orientation, kf.position)
-            if correction is None:
-                vertex = self.vertex(kf.id)
-                if vertex.fixed():
-                    continue
-                corrected = vertex.estimate()
-            else:
-                corrected = uncorrected * correction
-
-            delta = uncorrected.inverse() * corrected
-            if (g2o.AngleAxis(delta.rotation()).angle() < 0.02 and
-                np.linalg.norm(delta.translation()) < 0.03):          # 1°, 3cm
-                continue
-
-            for m in kf.measurements():
-                if m.from_triangulation():
-                    old = m.mappoint.position
-                    new = corrected * (uncorrected.inverse() * old)
-                    m.mappoint.update_position(new)  
-                    # update normal ?
-            kf.update_pose(corrected)

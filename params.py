@@ -1,10 +1,8 @@
 import cv2
 
-
-
 class Params(object):
     def __init__(self):
-        
+
         self.pnp_min_measurements = 10
         self.pnp_max_iterations = 10
         self.init_min_points = 10
@@ -29,13 +27,13 @@ class Params(object):
 
 
 class ParamsEuroc(Params):
-    
+
     def __init__(self, config='GFTT-BRIEF'):
         super().__init__()
 
         if config == 'GFTT-BRIEF':
             self.feature_detector = cv2.GFTTDetector_create(
-                maxCorners=1000, minDistance=15.0, 
+                maxCorners=1000, minDistance=15.0,
                 qualityLevel=0.001, useHarrisDetector=False)
 
             self.descriptor_extractor = cv2.xfeatures2d.BriefDescriptorExtractor_create(
@@ -47,7 +45,7 @@ class ParamsEuroc(Params):
 
             self.descriptor_extractor = cv2.xfeatures2d.BriefDescriptorExtractor_create(
                 bytes=32, use_orientation=False)
-            
+
         else:
             raise NotImplementedError
 
@@ -72,8 +70,8 @@ class ParamsEuroc(Params):
         self.view_viewpoint_z = -10
         self.view_viewpoint_f = 2000
 
-    
-        
+
+
 
 class ParamsKITTI(Params):
     def __init__(self, config='GFTT-BRIEF'):
@@ -81,7 +79,7 @@ class ParamsKITTI(Params):
 
         if config == 'GFTT-BRIEF':
             self.feature_detector = cv2.GFTTDetector_create(
-                maxCorners=1000, minDistance=12.0, 
+                maxCorners=1000, minDistance=12.0,
                 qualityLevel=0.001, useHarrisDetector=False)
 
             self.descriptor_extractor = cv2.xfeatures2d.BriefDescriptorExtractor_create(
@@ -89,7 +87,7 @@ class ParamsKITTI(Params):
 
         elif config == 'GFTT-BRISK':
             self.feature_detector = cv2.GFTTDetector_create(
-                maxCorners=2000, minDistance=15.0, 
+                maxCorners=2000, minDistance=15.0,
                 qualityLevel=0.01, useHarrisDetector=False)
 
             self.descriptor_extractor = cv2.BRISK_create()
