@@ -27,9 +27,7 @@ class ImageFeature(object):
 
     def extract(self):
         self.keypoints = self.detector.detect(self.image)
-        self.keypoints, self.descriptors = self.extractor.compute(
-            self.image, self.keypoints)
-
+        self.keypoints, self.descriptors = self.extractor.compute(self.image, self.keypoints)
         self.unmatched = np.ones(len(self.keypoints), dtype=bool)
 
     def draw_keypoints(self, name='keypoints', delay=1):
