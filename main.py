@@ -7,7 +7,7 @@ import argparse
 from threading import Thread
 from Components.Camera import Camera
 from Components.StereoFrame import StereoFrame
-from Feature.feature import ImageFeature
+from Feature.ImageFeature import ImageFeature
 from Params.params import ParamsKITTI, ParamsEuroc
 from Dataset.KITTIOdometry import KITTIOdometry
 from Dataset.EuRoCDataset import EuRoCDataset
@@ -19,6 +19,10 @@ if __name__ == '__main__':
     parser.add_argument('--path', type=str, help='dataset path', default='path/to/your/KITTI_odometry/sequences/00')
     args = parser.parse_args()
 
+    ################
+    # Prepare parameters and dataset
+    ################
+
     if args.dataset.lower() == 'kitti':
         params = ParamsKITTI()
         dataset = KITTIOdometry(args.path)
@@ -26,19 +30,27 @@ if __name__ == '__main__':
         params = ParamsEuroc()
         dataset = EuRoCDataset(args.path)
 
+    ################
+    # Prepare SPTAM main routine
+    ################
     sptam = SPTAM(params)
+
 
     visualize = not args.no_viz
     if visualize:
         from Viewer.viewer import MapViewer
         viewer = MapViewer(sptam, params)
 
+    ########
+    # Prepare Camera Params
+    ########
     cam = Camera(
         dataset.cam.fx, dataset.cam.fy, dataset.cam.cx, dataset.cam.cy,
         dataset.cam.width, dataset.cam.height,
         params.frustum_near, params.frustum_far,
         dataset.cam.baseline)
 
+    ## the for loop
     durations = []
     for i in range(len(dataset))[:10]:#3000]:
         featurel = ImageFeature(dataset.left[i], params)
@@ -47,8 +59,12 @@ if __name__ == '__main__':
 
         time_start = time.time()
 
+        ## Do we really need the below? The init and join takes more time
+
+        # while extracting right feature,
         t = Thread(target=featurer.extract)
         t.start()
+        # extract left feature from the main thread
         featurel.extract()
         t.join()
 
