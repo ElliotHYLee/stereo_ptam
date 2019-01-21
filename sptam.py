@@ -89,14 +89,17 @@ class SPTAM(object):
 
         if self.loop_closing is not None:
             if self.loop_correction is not None:
-                estimated_pose = g2o.Isometry3d(frame.orientation, frame.position)
+                estimated_pose = g2o.Isometry3d(
+                    frame.orientation,
+                    frame.position)
                 estimated_pose = estimated_pose * self.loop_correction
                 frame.update_pose(estimated_pose)
                 self.motion_model.apply_correction(self.loop_correction)
                 self.loop_correction = None
 
         local_mappoints = self.filter_points(frame)
-        measurements = frame.match_mappoints(local_mappoints, Measurement.Source.TRACKING)
+        measurements = frame.match_mappoints(
+            local_mappoints, Measurement.Source.TRACKING)
 
         print('measurements:', len(measurements), '   ', len(local_mappoints))
 

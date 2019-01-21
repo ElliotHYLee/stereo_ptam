@@ -23,5 +23,4 @@ class Camera(object):
 
     def compute_right_camera_pose(self, pose):
         pos = pose * np.array([self.baseline, 0, 0])
-        #pos = np.array([self.baseline, 0, 0])
         return g2o.Isometry3d(pose.orientation(), pos)

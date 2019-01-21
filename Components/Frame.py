@@ -2,20 +2,22 @@ import numpy as np
 import g2o
 
 class Frame(object):
-    def __init__(self, idx, pose, left_feature, cam, timestamp=None, pose_covariance = np.identity(6)):
+    def __init__(self, idx, pose, feature, cam, timestamp=None,
+            pose_covariance = np.identity(6)):
         self.idx = idx
         self.pose = pose    # g2o.Isometry3d
-        self.left_feature = left_feature
+        self.feature = feature
         self.cam = cam
         self.timestamp = timestamp
-        self.image = left_feature.image
+        self.image = feature.image
 
         self.orientation = pose.orientation()
         self.position = pose.position()
         self.pose_covariance = pose_covariance
 
         self.transform_matrix = pose.inverse().matrix()[:3] # shape: (3, 4)
-        self.projection_matrix = (self.cam.intrinsic.dot(self.transform_matrix))  # from world frame to image
+        self.projection_matrix = (
+            self.cam.intrinsic.dot(self.transform_matrix))  # from world frame to image
 
     # batch version
     def can_view(self, points, ground=False, margin=20):    # Frustum Culling
@@ -47,7 +49,8 @@ class Frame(object):
         self.position = self.pose.position()
 
         self.transform_matrix = self.pose.inverse().matrix()[:3]
-        self.projection_matrix = (self.cam.intrinsic.dot(self.transform_matrix))
+        self.projection_matrix = (
+            self.cam.intrinsic.dot(self.transform_matrix))
 
     def transform(self, points):    # from world coordinates
         '''
@@ -85,15 +88,15 @@ class Frame(object):
         points = np.transpose(points)
         proj, _ = self.project(self.transform(points))
         proj = proj.transpose()
-        return self.left_feature.find_matches(proj, descriptors)
+        return self.feature.find_matches(proj, descriptors)
 
     def get_keypoint(self, i):
-        return self.left_feature.get_keypoint(i)
+        return self.feature.get_keypoint(i)
     def get_descriptor(self, i):
-        return self.left_feature.get_descriptor(i)
+        return self.feature.get_descriptor(i)
     def get_color(self, pt):
-        return self.left_feature.get_color(pt)
+        return self.feature.get_color(pt)
     def set_matched(self, i):
-        self.left_feature.set_matched(i)
+        self.feature.set_matched(i)
     def get_unmatched_keypoints(self):
-        return self.left_feature.get_unmatched_keypoints()
+        return self.feature.get_unmatched_keypoints()

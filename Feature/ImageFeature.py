@@ -36,7 +36,8 @@ class ImageFeature(object):
         else:
             image = self.image
         img = cv2.drawKeypoints(image, self.keypoints, None, flags=0)
-        cv2.imshow(name, img);cv2.waitKey(delay)
+        cv2.imshow(name, img)
+        cv2.waitKey(delay)
 
     def find_matches(self, predictions, descriptors):
         matches = dict()
@@ -79,6 +80,7 @@ class ImageFeature(object):
 
     def get_keypoint(self, i):
         return self.keypoints[i]
+
     def get_descriptor(self, i):
         return self.descriptors[i]
 
