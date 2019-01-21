@@ -89,8 +89,7 @@ class StereoFrame(Frame):
         kps_left, desps_left, idx_left = self.left.get_unmatched_keypoints()
         kps_right, desps_right, idx_right = self.right.get_unmatched_keypoints()
 
-        mappoints, matches = self.triangulate_points(
-            kps_left, desps_left, kps_right, desps_right)
+        mappoints, matches = self.triangulate_points(kps_left, desps_left, kps_right, desps_right)
 
         measurements = []
         for mappoint, (i, j) in zip(mappoints, matches):
@@ -109,8 +108,7 @@ class StereoFrame(Frame):
         return mappoints, measurements
 
     def triangulate_points(self, kps_left, desps_left, kps_right, desps_right):
-        matches = self.feature.row_match(
-            kps_left, desps_left, kps_right, desps_right)
+        matches = self.feature.row_match(kps_left, desps_left, kps_right, desps_right)
         assert len(matches) > 0
 
         px_left = np.array([kps_left[m.queryIdx].pt for m in matches])
@@ -139,8 +137,7 @@ class StereoFrame(Frame):
 
             color = self.left.get_color(px_left[i])
 
-            mappoint = MapPoint(
-                point, normal, desps_left[matches[i].queryIdx], color)
+            mappoint = MapPoint(point, normal, desps_left[matches[i].queryIdx], color)
             mappoints.append(mappoint)
             matchs.append((matches[i].queryIdx, matches[i].trainIdx))
 
