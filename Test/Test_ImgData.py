@@ -28,23 +28,8 @@ class Test_ImgData:
         cv2.imshow('right', self.img_0r)
         cv2.waitKey(3*1000)
 
-    def feature(self):
-        featurel = ImageFeature(self.img_0l, self.params)
-        featurer = ImageFeature(self.img_0r, self.params)
 
-        start = time.time()
-        featurel.extract()
-        featurer.extract()
-        end = time.time()
-        print(end - start)
 
-        start = time.time()
-        t = Thread(target=featurel.extract)
-        t.start()
-        featurer.extract()
-        t.join()
-        end = time.time()
-        print(end - start)
 
 
 

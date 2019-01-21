@@ -10,11 +10,11 @@ from Components.Measurement import Measurement
 from Components.MapPoint import MapPoint
 
 class StereoFrame(Frame):
-    def __init__(self, idx, pose, feature, right_feature, cam,
-            right_cam=None, timestamp=None, pose_covariance=np.identity(6)):
+    def __init__(self, idx, pose, left_feature, right_feature, cam,
+                 right_cam=None, timestamp=None, pose_covariance=np.identity(6)):
 
-        super().__init__(idx, pose, feature, cam, timestamp, pose_covariance)
-        self.left  = Frame(idx, pose, feature, cam, timestamp, pose_covariance)
+        super().__init__(idx, pose, left_feature, cam, timestamp, pose_covariance)
+        self.left  = Frame(idx, pose, left_feature, cam, timestamp, pose_covariance)
         self.right = Frame(idx,
             cam.compute_right_camera_pose(pose),
             right_feature, right_cam or cam,
@@ -89,8 +89,7 @@ class StereoFrame(Frame):
         kps_left, desps_left, idx_left = self.left.get_unmatched_keypoints()
         kps_right, desps_right, idx_right = self.right.get_unmatched_keypoints()
 
-        mappoints, matches = self.triangulate_points(
-            kps_left, desps_left, kps_right, desps_right)
+        mappoints, matches = self.triangulate_points(kps_left, desps_left, kps_right, desps_right)
 
         measurements = []
         for mappoint, (i, j) in zip(mappoints, matches):
@@ -109,8 +108,7 @@ class StereoFrame(Frame):
         return mappoints, measurements
 
     def triangulate_points(self, kps_left, desps_left, kps_right, desps_right):
-        matches = self.feature.row_match(
-            kps_left, desps_left, kps_right, desps_right)
+        matches = self.left_feature.row_match(kps_left, desps_left, kps_right, desps_right)
         assert len(matches) > 0
 
         px_left = np.array([kps_left[m.queryIdx].pt for m in matches])
@@ -177,6 +175,6 @@ class StereoFrame(Frame):
         from Components.KeyFrame import KeyFrame
         return KeyFrame(
             self.idx, self.pose,
-            self.left.feature, self.right.feature,
+            self.left.left_feature, self.right.left_feature,
             self.cam, self.right.cam,
             self.pose_covariance)

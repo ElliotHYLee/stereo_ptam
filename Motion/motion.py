@@ -27,22 +27,18 @@ class MotionModel(object):
         '''
         Get the current camera pose.
         '''
-        return (g2o.Isometry3d(self.orientation, self.position), 
-            self.covariance)
+        return (g2o.Isometry3d(self.orientation, self.position), self.covariance)
 
     def predict_pose(self, timestamp):
         '''
         Predict the next camera pose.
         '''
         if not self.initialized:
-            return (g2o.Isometry3d(self.orientation, self.position), 
-                self.covariance)
+            return (g2o.Isometry3d(self.orientation, self.position), self.covariance)
         
         dt = timestamp - self.timestamp
 
-        delta_angle = g2o.AngleAxis(
-            self.v_angular_angle * dt * self.damp, 
-            self.v_angular_axis)
+        delta_angle = g2o.AngleAxis(self.v_angular_angle * dt * self.damp,self.v_angular_axis)
         delta_orientation = g2o.Quaternion(delta_angle)
 
         position = self.position + self.v_linear * dt * self.damp
