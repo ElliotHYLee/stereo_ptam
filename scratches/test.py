@@ -60,7 +60,7 @@ def main(dataset, params):
 if __name__ == '__main__':
     params = ParamsKITTI()
 
-    dataset = KITTIOdometry('/media/el/Data/DLData/KITTI/odom/dataset/sequences/00')
+    dataset = KITTIOdometry('~/Downloads/KITTI/sequences/00')
     main(dataset, params)
 
 

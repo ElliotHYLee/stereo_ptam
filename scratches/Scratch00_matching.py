@@ -43,16 +43,10 @@ for m in matches:
 qIdx = goodMatchList[50].queryIdx
 tIdx = goodMatchList[50].trainIdx
 
-print(qIdx, tIdx)
 
 pt1 = kps_left[qIdx].pt
 pt2 = kps_right[qIdx].pt
 
-print(pt1, pt2)
-
-
-# px_left = np.array([kps_left[m.queryIdx].pt for m in goodMatchList])
-# px_right = np.array([kps_right[m.trainIdx].pt for m in goodMatchList])
 
 kps1 = [kps_left[m.queryIdx] for m in goodMatchList]
 kps2 = [kps_right[m.trainIdx] for m in goodMatchList]
