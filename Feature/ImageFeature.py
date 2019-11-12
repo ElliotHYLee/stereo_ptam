@@ -106,7 +106,6 @@ class ImageFeature(object):
                 keypoints.append(self.keypoints[i])
                 descriptors.append(self.descriptors[i])
                 indices.append(i)
-
         return keypoints, descriptors, indices
 
 

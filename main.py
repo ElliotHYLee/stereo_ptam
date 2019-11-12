@@ -13,33 +13,33 @@ from Dataset.KITTIOdometry import KITTIOdometry
 from Dataset.EuRoCDataset import EuRoCDataset
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--no-viz', action='store_true', help='do not visualize')
-    parser.add_argument('--dataset', type=str, help='dataset (KITTI/EuRoC)', default='KITTI')
-    parser.add_argument('--path', type=str, help='dataset path', default='path/to/your/KITTI_odometry/sequences/00')
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--no-viz', action='store_true', help='do not visualize')
+    # parser.add_argument('--dataset', type=str, help='dataset (KITTI/EuRoC)', default='KITTI')
+    # parser.add_argument('--path', type=str, help='dataset path', default='path/to/your/KITTI_odometry/sequences/00')
+    # args = parser.parse_args()
 
     ################
     # Prepare parameters and dataset
     ################
 
-    if args.dataset.lower() == 'kitti':
-        params = ParamsKITTI()
-        dataset = KITTIOdometry(args.path)
-    elif args.dataset.lower() == 'euroc':
-        params = ParamsEuroc()
-        dataset = EuRoCDataset(args.path)
+    # if args.dataset.lower() == 'kitti':
+    #     params = ParamsKITTI()
+    #     dataset = KITTIOdometry('~/Downloads/KITTI/sequences/00')
+    # elif args.dataset.lower() == 'euroc':
+        # params = ParamsEuroc()
+        # dataset = EuRoCDataset(args.path)
+
+    params = ParamsKITTI()
+    dataset = KITTIOdometry('~/Downloads/KITTI/sequences/00')
 
     ################
     # Prepare SPTAM main routine
     ################
     sptam = SPTAM(params)
 
-
-    visualize = not args.no_viz
-    if visualize:
-        from Viewer.viewer import MapViewer
-        viewer = MapViewer(sptam, params)
+    from Viewer.viewer import MapViewer
+    viewer = MapViewer(sptam, params)
 
     ########
     # Prepare Camera Params
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     ## the for loop
     durations = []
-    for i in range(len(dataset))[:10]:#3000]:
+    for i in range(len(dataset))[:1]:#3000]:
         featurel = ImageFeature(dataset.left[i], params)
         featurer = ImageFeature(dataset.right[i], params)
         timestamp = dataset.timestamps[i]
@@ -71,6 +71,7 @@ if __name__ == '__main__':
         frame = StereoFrame(i, g2o.Isometry3d(), featurel, featurer, cam, timestamp=timestamp)
 
         if not sptam.is_initialized():
+            print('\nim here1 \n')
             sptam.initialize(frame)
         else:
             sptam.track(frame)
@@ -82,8 +83,8 @@ if __name__ == '__main__':
         print()
         print()
 
-        if visualize:
-            viewer.update()
+
+        viewer.update()
 
     print('num frames', len(durations))
     print('num keyframes', len(sptam.graph.keyframes()))
@@ -91,5 +92,4 @@ if __name__ == '__main__':
 
 
     sptam.stop()
-    if visualize:
-        viewer.stop()
+    viewer.stop()
