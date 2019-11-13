@@ -44,15 +44,14 @@ if __name__ == '__main__':
     ########
     # Prepare Camera Params
     ########
-    cam = Camera(
-        dataset.cam.fx, dataset.cam.fy, dataset.cam.cx, dataset.cam.cy,
-        dataset.cam.width, dataset.cam.height,
-        params.frustum_near, params.frustum_far,
-        dataset.cam.baseline)
+    cam = Camera(dataset.cam.fx, dataset.cam.fy, dataset.cam.cx, dataset.cam.cy,
+                 dataset.cam.width, dataset.cam.height,
+                 params.frustum_near, params.frustum_far,
+                 dataset.cam.baseline)
 
     ## the for loop
     durations = []
-    for i in range(len(dataset))[:1]:#3000]:
+    for i in range(0, 200):#len(dataset)):#3000]:
         featurel = ImageFeature(dataset.left[i], params)
         featurer = ImageFeature(dataset.right[i], params)
         timestamp = dataset.timestamps[i]
@@ -71,7 +70,6 @@ if __name__ == '__main__':
         frame = StereoFrame(i, g2o.Isometry3d(), featurel, featurer, cam, timestamp=timestamp)
 
         if not sptam.is_initialized():
-            print('\nim here1 \n')
             sptam.initialize(frame)
         else:
             sptam.track(frame)

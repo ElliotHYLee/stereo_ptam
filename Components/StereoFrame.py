@@ -10,18 +10,12 @@ from Components.Measurement import Measurement
 from Components.MapPoint import MapPoint
 
 class StereoFrame(Frame):
-    def __init__(self, idx, pose, feature, right_feature, cam,
-            right_cam=None, timestamp=None, pose_covariance=np.identity(6)):
-
+    def __init__(self, idx, pose, feature, right_feature, cam, right_cam=None, timestamp=None, pose_covariance=np.identity(6)):
         super().__init__(idx, pose, feature, cam, timestamp, pose_covariance)
         self.left  = Frame(idx, pose, feature, cam, timestamp, pose_covariance)
-        self.right = Frame(idx,
-            cam.compute_right_camera_pose(pose),
-            right_feature, right_cam or cam,
-            timestamp, pose_covariance)
+        self.right = Frame(idx, cam.compute_right_camera_pose(pose), right_feature, right_cam or cam, timestamp, pose_covariance)
 
     def find_matches(self, source, points, descriptors):
-
         q2 = Queue()
         def find_right(points, descriptors, q):
             m = dict(self.right.find_matches(points, descriptors))
@@ -93,11 +87,10 @@ class StereoFrame(Frame):
 
         measurements = []
         for mappoint, (i, j) in zip(mappoints, matches):
-            meas = Measurement(
-                Measurement.Type.STEREO,
-                Measurement.Source.TRIANGULATION,
-                [kps_left[i], kps_right[j]],
-                [desps_left[i], desps_right[j]])
+            meas = Measurement(Measurement.Type.STEREO,
+                               Measurement.Source.TRIANGULATION,
+                               [kps_left[i], kps_right[j]],
+                               [desps_left[i], desps_right[j]])
             meas.mappoint = mappoint
             meas.view = self.transform(mappoint.position)
             measurements.append(meas)
@@ -114,12 +107,13 @@ class StereoFrame(Frame):
         px_left = np.array([kps_left[m.queryIdx].pt for m in matches])
         px_right = np.array([kps_right[m.trainIdx].pt for m in matches])
 
+        # print(self.left.projection_matrix)
+        # points in world coord
         points = cv2.triangulatePoints(
-            self.left.projection_matrix,
+            self.left.projection_matrix, # 3D world to 2D img
             self.right.projection_matrix,
             px_left.transpose(),
-            px_right.transpose()
-            ).transpose()  # shape: (N, 4)
+            px_right.transpose()).transpose()  # shape: (N, 4)
 
         points = points[:, :3] / points[:, 3:]
 
@@ -146,8 +140,7 @@ class StereoFrame(Frame):
     def update_pose(self, pose):
         super().update_pose(pose)
         self.right.update_pose(pose)
-        self.left.update_pose(
-            self.cam.compute_right_camera_pose(pose))
+        self.left.update_pose(self.cam.compute_right_camera_pose(pose))
 
     # batch version
     def can_view(self, mappoints):

@@ -60,6 +60,8 @@ class BundleAdjustment(g2o.SparseOptimizer):
             edge = self.mono_edge(meas.xy)
         elif meas.is_right():
             edge = self.mono_edge_right(meas.xy)
+        else:
+            edge = None
 
         edge.set_id(id)
         edge.set_vertex(0, self.vertex(point_id * 2 + 1))

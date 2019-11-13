@@ -38,8 +38,7 @@ class Mapping(object):
 
     def fill(self, keyframes, keyframe):
         covisible = sorted(
-            keyframe.covisibility_keyframes().items(),
-            key=lambda _:_[1], reverse=True)
+            keyframe.covisibility_keyframes().items(), key=lambda _:_[1], reverse=True)
 
         for kf, n in covisible:
             if n > 0 and kf not in keyframes and self.is_safe(kf):

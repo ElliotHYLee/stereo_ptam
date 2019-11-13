@@ -29,14 +29,12 @@ class KeyFrame(GraphKeyFrame, StereoFrame):
     def update_reference(self, reference=None):
         if reference is not None:
             self.reference_keyframe = reference
-        self.reference_constraint = (
-            self.reference_keyframe.pose.inverse() * self.pose)
+        self.reference_constraint = (self.reference_keyframe.pose.inverse() * self.pose)
 
     def update_preceding(self, preceding=None):
         if preceding is not None:
             self.preceding_keyframe = preceding
-        self.preceding_constraint = (
-            self.preceding_keyframe.pose.inverse() * self.pose)
+        self.preceding_constraint = (self.preceding_keyframe.pose.inverse() * self.pose)
 
     def set_loop(self, keyframe, constraint):
         self.loop_keyframe = keyframe

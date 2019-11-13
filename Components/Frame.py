@@ -2,8 +2,7 @@ import numpy as np
 import g2o
 
 class Frame(object):
-    def __init__(self, idx, pose, feature, cam, timestamp=None,
-            pose_covariance = np.identity(6)):
+    def __init__(self, idx, pose, feature, cam, timestamp=None, pose_covariance = np.identity(6)):
         self.idx = idx
         self.pose = pose    # g2o.Isometry3d
         self.feature = feature
@@ -16,8 +15,7 @@ class Frame(object):
         self.pose_covariance = pose_covariance
 
         self.transform_matrix = pose.inverse().matrix()[:3] # shape: (3, 4)
-        self.projection_matrix = (
-            self.cam.intrinsic.dot(self.transform_matrix))  # from world frame to image
+        self.projection_matrix = (self.cam.intrinsic.dot(self.transform_matrix))  # from world frame to image
 
     # batch version
     def can_view(self, points, ground=False, margin=20):    # Frustum Culling
@@ -38,7 +36,6 @@ class Frame(object):
                 u <= self.cam.width + margin,
                 v >= - margin,
                 v <= self.cam.height + margin])
-
 
     def update_pose(self, pose):
         if isinstance(pose, g2o.SE3Quat):

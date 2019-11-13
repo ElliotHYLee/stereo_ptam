@@ -39,10 +39,8 @@ for m in matches:
         abs(pt1[0] - pt2[0]) < 100):
         goodMatchList.append(m)
 
-
 qIdx = goodMatchList[50].queryIdx
 tIdx = goodMatchList[50].trainIdx
-
 
 pt1 = kps_left[qIdx].pt
 pt2 = kps_right[qIdx].pt

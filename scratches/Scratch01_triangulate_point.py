@@ -13,6 +13,7 @@ from Components.Camera import *
 from Components.Frame import Frame
 from Feature.ImageFeature import *
 
+
 def main(dataset, params):
     cam = Camera(
         dataset.cam.fx, dataset.cam.fy, dataset.cam.cx, dataset.cam.cy,
@@ -40,16 +41,17 @@ def main(dataset, params):
     px_left = np.array([kps_left[m.queryIdx].pt for m in matches])
     px_right = np.array([kps_right[m.trainIdx].pt for m in matches])
 
+
     points = cv2.triangulatePoints(
         left.projection_matrix,
         right.projection_matrix,
-        px_left.transpose(),
-        px_right.transpose()
-    ).transpose()
+        px_left.T,
+        px_right.T
+    ).T
 
     print(left.projection_matrix)
     print(right.projection_matrix)
-    print(px_left.transpose().shape)
+    print(px_left.T.shape)
 
     pc = points[:, :3] / points[:, 3:]
     print(pc)

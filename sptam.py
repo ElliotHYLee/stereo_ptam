@@ -73,8 +73,7 @@ class SPTAM(object):
         self.current = keyframe
         self.status['initialized'] = True
 
-        self.motion_model.update_pose(
-            frame.timestamp, frame.position, frame.orientation)
+        self.motion_model.update_pose(frame.timestamp, frame.position, frame.orientation)
 
     def track(self, frame):
         while self.is_paused():
@@ -89,17 +88,14 @@ class SPTAM(object):
 
         if self.loop_closing is not None:
             if self.loop_correction is not None:
-                estimated_pose = g2o.Isometry3d(
-                    frame.orientation,
-                    frame.position)
+                estimated_pose = g2o.Isometry3d(frame.orientation, frame.position)
                 estimated_pose = estimated_pose * self.loop_correction
                 frame.update_pose(estimated_pose)
                 self.motion_model.apply_correction(self.loop_correction)
                 self.loop_correction = None
 
         local_mappoints = self.filter_points(frame)
-        measurements = frame.match_mappoints(
-            local_mappoints, Measurement.Source.TRACKING)
+        measurements = frame.match_mappoints(local_mappoints, Measurement.Source.TRACKING)
 
         print('measurements:', len(measurements), '   ', len(local_mappoints))
 
@@ -112,11 +108,9 @@ class SPTAM(object):
 
         try:
             self.reference = self.graph.get_reference_frame(tracked_map)
-
             pose = self.tracker.refine_pose(frame.pose, frame.cam, measurements)
             frame.update_pose(pose)
-            self.motion_model.update_pose(
-                frame.timestamp, pose.position(), pose.orientation())
+            self.motion_model.update_pose(frame.timestamp, pose.position(), pose.orientation())
             tracking_is_ok = True
         except:
             tracking_is_ok = False
@@ -132,9 +126,7 @@ class SPTAM(object):
             if self.loop_closing is not None:
                 self.loop_closing.add_keyframe(keyframe)
             self.preceding = keyframe
-
         self.set_tracking(False)
-
 
     def filter_points(self, frame):
         local_mappoints = self.graph.get_local_map_v2([self.preceding, self.reference])[0]
@@ -162,7 +154,6 @@ class SPTAM(object):
                 filtered.append(pt)
 
         return filtered
-
 
     def should_be_keyframe(self, frame, measurements):
         if self.adding_keyframes_stopped():

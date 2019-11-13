@@ -11,9 +11,7 @@ class MapPoint(GraphMapPoint):
     _id = 0
     _id_lock = Lock()
 
-    def __init__(self, position, normal, descriptor,
-            color=np.zeros(3),
-            covariance=np.identity(3) * 1e-4):
+    def __init__(self, position, normal, descriptor, color=np.zeros(3), covariance=np.identity(3) * 1e-4):
         super().__init__()
 
         with MapPoint._id_lock:
