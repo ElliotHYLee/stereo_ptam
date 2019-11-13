@@ -40,9 +40,7 @@ class MotionModel(object):
         
         dt = timestamp - self.timestamp
 
-        delta_angle = g2o.AngleAxis(
-            self.v_angular_angle * dt * self.damp, 
-            self.v_angular_axis)
+        delta_angle = g2o.AngleAxis(self.v_angular_angle * dt * self.damp, self.v_angular_axis)
         delta_orientation = g2o.Quaternion(delta_angle)
 
         position = self.position + self.v_linear * dt * self.damp
@@ -50,8 +48,7 @@ class MotionModel(object):
 
         return (g2o.Isometry3d(orientation, position), self.covariance)
 
-    def update_pose(self, timestamp, 
-            new_position, new_orientation, new_covariance=None):
+    def update_pose(self, timestamp, new_position, new_orientation, new_covariance=None):
         '''
         Update the motion model when given a new camera pose.
         '''

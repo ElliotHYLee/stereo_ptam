@@ -34,15 +34,12 @@ def main(dataset, params):
     i = 0
     timestamp = dataset.timestamps[i]
     sFrame = StereoFrame(i, g2o.Isometry3d(), featurel, featurer, cam, timestamp=timestamp)
-    mappoints, measurement = sFrame.triangulate()
+    mappoints, measurements = sFrame.triangulate()
 
     # mappoints: que of mappoint
     # mappoint: object containing 3D vector of each point in point cloud in world coord.
-    # measurement: object containing keypoints and descriptors of left and right cooresponding to mapppoint
-
+    # measurements: object containing keypoints and descriptors of left and right cooresponding to mapppoint
     print(mappoints[0].position)
-
-
 
 
 if __name__ == '__main__':

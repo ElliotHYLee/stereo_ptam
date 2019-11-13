@@ -21,8 +21,7 @@ class Tracking(object):
         self.max_iterations = params.pnp_max_iterations
 
     def refine_pose(self, pose, cam, measurements):
-        assert len(measurements) >= self.min_measurements, (
-            'Not enough points')
+        assert len(measurements) >= self.min_measurements, ('Not enough points')
 
         self.optimizer.clear()
         self.optimizer.add_pose(0, pose, cam, fixed=False)
@@ -101,11 +100,10 @@ class SPTAM(object):
 
         tracked_map = set()
         for m in measurements:
-            mappoint = m.mappoint
+            mappoint = m.mappoint # point clouds at this iteration
             mappoint.update_descriptor(m.get_descriptor())
             mappoint.increase_measurement_count()
             tracked_map.add(mappoint)
-
         try:
             self.reference = self.graph.get_reference_frame(tracked_map)
             pose = self.tracker.refine_pose(frame.pose, frame.cam, measurements)
