@@ -35,15 +35,12 @@ class PoseGraphOptimization(g2o.SparseOptimizer):
             edge.set_vertex(i, v)
 
         if measurement is None:
-            measurement = (
-                edge.vertex(0).estimate().inverse() *
-                edge.vertex(1).estimate())
+            measurement = (edge.vertex(0).estimate().inverse() * edge.vertex(1).estimate())
         edge.set_measurement(measurement)
         edge.set_information(information)
         if robust_kernel is not None:
             edge.set_robust_kernel(robust_kernel)
         super().add_edge(edge)
-
 
     def set_data(self, keyframes, loops):
         super().clear()
@@ -77,8 +74,7 @@ class PoseGraphOptimization(g2o.SparseOptimizer):
             self.add_edge((kf.id, kf2.id), measurement=meas)
 
 
-    def update_poses_and_points(
-            self, keyframes, correction=None, exclude=set()):
+    def update_poses_and_points(self, keyframes, correction=None, exclude=set()):
 
         for kf in keyframes:
             if len(exclude) > 0 and kf in exclude:

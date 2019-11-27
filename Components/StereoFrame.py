@@ -36,11 +36,10 @@ class StereoFrame(Frame):
                 if abs(y1 - y2) > 2.5:    # epipolar constraint
                     continue   # TODO: choose one
 
-                meas = Measurement(
-                    Measurement.Type.STEREO,
-                    source,
-                    [self.left.get_keypoint(j), self.right.get_keypoint(j2)],
-                    [self.left.get_descriptor(j), self.right.get_descriptor(j2)])
+                meas = Measurement(Measurement.Type.STEREO,
+                                    source,
+                                    [self.left.get_keypoint(j), self.right.get_keypoint(j2)],
+                                    [self.left.get_descriptor(j), self.right.get_descriptor(j2)])
                 measurements.append((i, meas))
                 self.left.set_matched(j)
                 self.right.set_matched(j2)

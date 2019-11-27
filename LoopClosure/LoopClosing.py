@@ -51,9 +51,7 @@ class LoopClosing(object):
                 return
 
             # check if this keyframe share many mappoints with a loop keyframe
-            covisible = sorted(
-                keyframe.covisibility_keyframes().items(),
-                key=lambda _:_[1], reverse=True)
+            covisible = sorted(keyframe.covisibility_keyframes().items(), key=lambda _:_[1], reverse=True)
             if any([(keyframe.id - _[0].id) > 5 for _ in covisible[:2]]):
                 continue
 
@@ -83,8 +81,7 @@ class LoopClosing(object):
             if np.abs(dist).max() > self.params.lc_distance_threshold:
                 continue
 
-            self.loops.append(
-                (match_keyframe, query_keyframe, result.constraint))
+            self.loops.append((match_keyframe, query_keyframe, result.constraint))
             query_keyframe.set_loop(match_keyframe, result.constraint)
 
             # We have to ensure that the mapping thread is on a safe part of code,
@@ -94,15 +91,13 @@ class LoopClosing(object):
             for kf in self.system.reference.covisibility_keyframes():
                 safe_window.add(kf)
 
-
             # The safe window established between the Local Mapping must be
             # inside the considered KFs.
             considered_keyframes = self.system.graph.keyframes()
 
             self.optimizer.set_data(considered_keyframes, self.loops)
 
-            before_lc = [
-                g2o.Isometry3d(kf.orientation, kf.position) for kf in safe_window]
+            before_lc = [g2o.Isometry3d(kf.orientation, kf.position) for kf in safe_window]
 
             # Propagate initial estimate through 10% of total keyframes
             # (or at least 20 keyframes)
@@ -114,8 +109,7 @@ class LoopClosing(object):
             self.optimizer.optimize(20)
 
             # Exclude KFs that may being use by the local BA.
-            self.optimizer.update_poses_and_points(
-                considered_keyframes, exclude=safe_window)
+            self.optimizer.update_poses_and_points(considered_keyframes, exclude=safe_window)
 
             self.system.stop_adding_keyframes()
 
@@ -138,9 +132,7 @@ class LoopClosing(object):
                 if keyframe in safe_window:
                     reference = keyframe
                     break
-            uncorrected = g2o.Isometry3d(
-                reference.orientation,
-                reference.position)
+            uncorrected = g2o.Isometry3d(reference.orientation, reference.position)
             corrected = self.optimizer.vertex(reference.id).estimate()
             T = uncorrected.inverse() * corrected   # close to result.correction
 
@@ -156,29 +148,23 @@ class LoopClosing(object):
             # keyframes after loop closing
             keyframes = self.system.graph.keyframes()
             if len(keyframes) > len(considered_keyframes):
-                self.optimizer.update_poses_and_points(
-                    keyframes[len(considered_keyframes) - len(keyframes):],
-                    correction=T)
+                self.optimizer.update_poses_and_points(keyframes[len(considered_keyframes) - len(keyframes):], correction=T)
 
             for m13, _ in result.stereo_matches:
                 query_meas = result.query_stereo_measurements[m13.queryIdx]
                 match_meas = result.match_stereo_measurements[m13.trainIdx]
 
-                new_query_meas = Measurement(
-                    Measurement.Type.STEREO,
-                    Measurement.Source.REFIND,
-                    query_meas.get_keypoints(),
-                    query_meas.get_descriptors())
-                self.system.graph.add_measurement(
-                    query_keyframe, match_meas.mappoint, new_query_meas)
+                new_query_meas = Measurement(Measurement.Type.STEREO,
+                                             Measurement.Source.REFIND,
+                                             query_meas.get_keypoints(),
+                                             query_meas.get_descriptors())
+                self.system.graph.add_measurement(query_keyframe, match_meas.mappoint, new_query_meas)
 
-                new_match_meas = Measurement(
-                    Measurement.Type.STEREO,
-                    Measurement.Source.REFIND,
-                    match_meas.get_keypoints(),
-                    match_meas.get_descriptors())
-                self.system.graph.add_measurement(
-                    match_keyframe, query_meas.mappoint, new_match_meas)
+                new_match_meas = Measurement(Measurement.Type.STEREO,
+                                             Measurement.Source.REFIND,
+                                             match_meas.get_keypoints(),
+                                             match_meas.get_descriptors())
+                self.system.graph.add_measurement(match_keyframe, query_meas.mappoint, new_match_meas)
 
             self.system.mapping.free_window()
             self.system.resume_adding_keyframes()
@@ -189,8 +175,6 @@ class LoopClosing(object):
                 if keyframe is None:
                     return
             last_query_keyframe = query_keyframe
-
-
 
 def match_and_estimate(query_keyframe, match_keyframe, params):
     query = defaultdict(list)

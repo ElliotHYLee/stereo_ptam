@@ -2,10 +2,6 @@
 import numpy as np
 import g2o
 
-# custom libs
-from Optimization.PoseGraphOptimization import PoseGraphOptimization
-
-
 class BundleAdjustment(g2o.SparseOptimizer):
     def __init__(self, ):
         super().__init__()
@@ -34,10 +30,8 @@ class BundleAdjustment(g2o.SparseOptimizer):
             self.aborted = False
 
     def add_pose(self, pose_id, pose, cam, fixed=False):
-        sbacam = g2o.SBACam(
-            pose.orientation(), pose.position())
-        sbacam.set_cam(
-            cam.fx, cam.fy, cam.cx, cam.cy, cam.baseline)
+        sbacam = g2o.SBACam(pose.orientation(), pose.position())
+        sbacam.set_cam(cam.fx, cam.fy, cam.cx, cam.cy, cam.baseline)
 
         v_se3 = g2o.VertexCam()
         v_se3.set_id(pose_id * 2)
@@ -76,15 +70,13 @@ class BundleAdjustment(g2o.SparseOptimizer):
         e.set_information(information)
         return e
 
-    def mono_edge(self, projection,
-            information=np.identity(2) * 0.5):
+    def mono_edge(self, projection, information=np.identity(2) * 0.5):
         e = g2o.EdgeProjectP2MC()
         e.set_measurement(projection)
         e.set_information(information)
         return e
 
-    def mono_edge_right(self, projection,
-            information=np.identity(2) * 0.5):
+    def mono_edge_right(self, projection, information=np.identity(2) * 0.5):
         e = g2o.EdgeProjectP2MCRight()
         e.set_measurement(projection)
         e.set_information(information)
