@@ -6,8 +6,8 @@ from threading import Thread
 
 # custom libs
 from Tracking.Frames.Frame import Frame
-from Mapping.Measurement.Measurement import Measurement
-from Mapping.MapPoint.MapPoint import MapPoint
+from Maps.Measurement.Measurement import Measurement
+from Maps.MapPoint.MapPoint import MapPoint
 
 class StereoFrame(Frame):
     def __init__(self, idx, pose, feature, right_feature, cam, right_cam=None, timestamp=None, pose_covariance=np.identity(6)):
@@ -167,7 +167,7 @@ class StereoFrame(Frame):
         return np.logical_and(parallel, can_view)
 
     def to_keyframe(self):
-        from Tracking.Frames import KeyFrame
+        from Tracking.Frames.KeyFrame import KeyFrame
         return KeyFrame(
             self.idx, self.pose,
             self.left.feature, self.right.feature,

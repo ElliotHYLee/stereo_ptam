@@ -7,7 +7,7 @@ class BundleAdjustment(g2o.SparseOptimizer):
         super().__init__()
 
         # Higher confident (better than CHOLMOD, according to
-        # paper "3-D Mapping With an RGB-D Camera")
+        # paper "3-D Maps With an RGB-D Camera")
         solver = g2o.BlockSolverSE3(g2o.LinearSolverCSparseSE3())
         solver = g2o.OptimizationAlgorithmLevenberg(solver)
         super().set_algorithm(solver)

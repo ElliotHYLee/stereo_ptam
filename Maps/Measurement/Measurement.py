@@ -3,7 +3,7 @@ from enum import Enum
 import numpy as np
 
 # custom libs
-from Mapping.Measurement.GraphMeasurement import GraphMeasurement
+from Maps.Measurement.GraphMeasurement import GraphMeasurement
 
 class Measurement(GraphMeasurement):
 

@@ -2,7 +2,7 @@
 from threading import Lock
 
 # custom libs
-from Tracking.Frames import StereoFrame
+from Tracking.Frames.StereoFrame import StereoFrame
 from Tracking.Frames.GraphKeyFrame import GraphKeyFrame
 
 class KeyFrame(GraphKeyFrame, StereoFrame):

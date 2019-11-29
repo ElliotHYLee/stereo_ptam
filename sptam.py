@@ -5,10 +5,10 @@ import time
 from collections import defaultdict
 
 # custom libs
-from Mapping.CovisibilityGraph import CovisibilityGraph
+from Maps.CovisibilityGraph import CovisibilityGraph
 from Optimization.BundleAdjustment import BundleAdjustment
-from Mapping.mapping import MappingThread
-from Mapping.Measurement.Measurement import Measurement
+from Maps.mapping import MappingThread
+from Maps.Measurement.Measurement import Measurement
 from Tracking.motion import MotionModel
 from LoopClosure.LoopClosing import LoopClosing
 

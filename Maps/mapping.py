@@ -5,7 +5,7 @@ import time
 from itertools import chain
 from collections import defaultdict
 from Optimization.BundleAdjustment import LocalBA
-from Mapping.Measurement.Measurement import Measurement
+from Maps.Measurement.Measurement import Measurement
 
 class Mapping(object):
     def __init__(self, graph, params):

@@ -10,7 +10,7 @@ from collections import defaultdict, namedtuple
 
 # custom libs
 from Optimization.PoseGraphOptimization import PoseGraphOptimization
-from Mapping.Measurement.Measurement import Measurement
+from Maps.Measurement.Measurement import Measurement
 from LoopClosure.LoopDetection import LoopDetection
 
 class LoopClosing(object):
@@ -89,7 +89,7 @@ class LoopClosing(object):
             for kf in self.system.reference.covisibility_keyframes():
                 safe_window.add(kf)
 
-            # The safe window established between the Local Mapping must be
+            # The safe window established between the Local Maps must be
             # inside the considered KFs.
             considered_keyframes = self.system.graph.keyframes()
 
