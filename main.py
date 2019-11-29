@@ -2,8 +2,8 @@ from sptam import *
 import g2o
 from threading import Thread
 from Params.Camera import Camera
-from Frames.StereoFrame import StereoFrame
-from Frames.ImageFeature import ImageFeature
+from Tracking.Frames import StereoFrame
+from Tracking.Frames.ImageFeature import ImageFeature
 from Params.params import ParamsKITTI
 from Dataset.KITTIOdometry import KITTIOdometry
 

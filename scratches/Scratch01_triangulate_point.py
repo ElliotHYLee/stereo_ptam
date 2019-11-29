@@ -4,8 +4,8 @@
 from Params.params import *
 from Dataset.KITTIOdometry import *
 from Params.Camera import *
-from Frames.Frame import Frame
-from Frames.ImageFeature import *
+from Tracking.Frames.Frame import Frame
+from Tracking.Frames.ImageFeature import *
 
 
 def main(dataset, params):

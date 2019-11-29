@@ -2,8 +2,8 @@
 from threading import Lock
 
 # custom libs
-from Frames.StereoFrame import StereoFrame
-from Frames.GraphKeyFrame import GraphKeyFrame
+from Tracking.Frames import StereoFrame
+from Tracking.Frames.GraphKeyFrame import GraphKeyFrame
 
 class KeyFrame(GraphKeyFrame, StereoFrame):
 

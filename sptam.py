@@ -9,7 +9,7 @@ from Mapping.CovisibilityGraph import CovisibilityGraph
 from Optimization.BundleAdjustment import BundleAdjustment
 from Mapping.mapping import MappingThread
 from Mapping.Measurement.Measurement import Measurement
-from Motion.motion import MotionModel
+from Tracking.motion import MotionModel
 from LoopClosure.LoopClosing import LoopClosing
 
 

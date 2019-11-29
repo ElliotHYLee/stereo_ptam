@@ -4,7 +4,7 @@ from threading import Thread
 import time
 
 # custom libs
-from Frames.ImageFeature import ImageFeature
+from Tracking.Frames.ImageFeature import ImageFeature
 
 
 class Test_ImgData:

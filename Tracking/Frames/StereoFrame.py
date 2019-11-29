@@ -5,7 +5,7 @@ from queue import Queue
 from threading import Thread
 
 # custom libs
-from Frames.Frame import Frame
+from Tracking.Frames.Frame import Frame
 from Mapping.Measurement.Measurement import Measurement
 from Mapping.MapPoint.MapPoint import MapPoint
 
@@ -167,7 +167,7 @@ class StereoFrame(Frame):
         return np.logical_and(parallel, can_view)
 
     def to_keyframe(self):
-        from Frames.KeyFrame import KeyFrame
+        from Tracking.Frames import KeyFrame
         return KeyFrame(
             self.idx, self.pose,
             self.left.feature, self.right.feature,
