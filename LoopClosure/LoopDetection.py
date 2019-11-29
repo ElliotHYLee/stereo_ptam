@@ -10,6 +10,7 @@ class LoopDetection(object):
         self.nns = NearestNeighbors()
 
     def add_keyframe(self, keyframe):
+        ## keyframe.feature = ImageFeature() left
         embedding = keyframe.feature.descriptors.mean(axis=0)
         self.nns.add_item(embedding, keyframe)
 

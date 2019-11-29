@@ -2,18 +2,23 @@
 import cv2
 import numpy as np
 from queue import Queue
-from threading import Lock, Thread
+from threading import Thread
 
 # custom libs
-from Components.Frame import Frame
-from Components.Measurement import Measurement
-from Components.MapPoint import MapPoint
+from Frames.Frame import Frame
+from Mapping.Measurement.Measurement import Measurement
+from Mapping.MapPoint.MapPoint import MapPoint
 
 class StereoFrame(Frame):
     def __init__(self, idx, pose, feature, right_feature, cam, right_cam=None, timestamp=None, pose_covariance=np.identity(6)):
         super().__init__(idx, pose, feature, cam, timestamp, pose_covariance)
         self.left  = Frame(idx, pose, feature, cam, timestamp, pose_covariance)
         self.right = Frame(idx, cam.compute_right_camera_pose(pose), right_feature, right_cam or cam, timestamp, pose_covariance)
+
+    ## me
+    ## returns list of pairs, pair = (i, measObj),
+    ## i = matched idx,
+    ## measObj = (feature[i], descriptor[i])
 
     def find_matches(self, source, points, descriptors):
         q2 = Queue()
@@ -54,11 +59,10 @@ class StereoFrame(Frame):
 
         for i, j in matches_right.items():
             if i not in matches_left:
-                meas = Measurement(
-                    Measurement.Type.RIGHT,
-                    source,
-                    [self.right.get_keypoint(j)],
-                    [self.right.get_descriptor(j)])
+                meas = Measurement(Measurement.Type.RIGHT,
+                                   source,
+                                   [self.right.get_keypoint(j)],
+                                   [self.right.get_descriptor(j)])
                 measurements.append((i, meas))
                 self.right.set_matched(j)
 
@@ -163,7 +167,7 @@ class StereoFrame(Frame):
         return np.logical_and(parallel, can_view)
 
     def to_keyframe(self):
-        from Components.KeyFrame import KeyFrame
+        from Frames.KeyFrame import KeyFrame
         return KeyFrame(
             self.idx, self.pose,
             self.left.feature, self.right.feature,

@@ -1,9 +1,9 @@
 # pip libs
-from threading import Lock, Thread
+from threading import Lock
 
 # custom libs
-from Components.StereoFrame import StereoFrame
-from Covisibility.GraphKeyFrame import GraphKeyFrame
+from Frames.StereoFrame import StereoFrame
+from Frames.GraphKeyFrame import GraphKeyFrame
 
 class KeyFrame(GraphKeyFrame, StereoFrame):
 
@@ -45,3 +45,4 @@ class KeyFrame(GraphKeyFrame, StereoFrame):
 
     def set_fixed(self, fixed=True):
         self.fixed = fixed
+

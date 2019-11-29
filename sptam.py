@@ -2,14 +2,13 @@
 import numpy as np
 import g2o
 import time
-from itertools import chain
 from collections import defaultdict
 
 # custom libs
-from Covisibility.CovisibilityGraph import CovisibilityGraph
+from Mapping.CovisibilityGraph import CovisibilityGraph
 from Optimization.BundleAdjustment import BundleAdjustment
-from Mapping.mapping import Mapping, MappingThread
-from Components.Measurement import Measurement
+from Mapping.mapping import MappingThread
+from Mapping.Measurement.Measurement import Measurement
 from Motion.motion import MotionModel
 from LoopClosure.LoopClosing import LoopClosing
 
@@ -85,7 +84,11 @@ class SPTAM(object):
         predicted_pose, _ = self.motion_model.predict_pose(frame.timestamp)
         frame.update_pose(predicted_pose)
 
+
         if self.loop_closing is not None:
+            ## me
+            ## self.loop_correction will be updated by LoopClosing()
+            ## Nov.27.2019
             if self.loop_correction is not None:
                 estimated_pose = g2o.Isometry3d(frame.orientation, frame.position)
                 estimated_pose = estimated_pose * self.loop_correction
@@ -93,7 +96,17 @@ class SPTAM(object):
                 self.motion_model.apply_correction(self.loop_correction)
                 self.loop_correction = None
 
+        ## me
+        ## get matched features from the covis.graph (?) based on the current frame
+        ## receives list of MapPoint()
+        ## Nov.27.2019
         local_mappoints = self.filter_points(frame)
+
+        ## me
+        ## find mathces based on the current feature descriptors from MapPoints(3D)
+        ## measurements = list of Measureemnt()
+        ## where Measurement(feature[i], dscriptr[i])
+        ## measurement obj has point cloud based on the features
         measurements = frame.match_mappoints(local_mappoints, Measurement.Source.TRACKING)
 
         print('measurements:', len(measurements), '   ', len(local_mappoints))
@@ -128,11 +141,8 @@ class SPTAM(object):
 
     def filter_points(self, frame):
         local_mappoints = self.graph.get_local_map_v2([self.preceding, self.reference])[0]
-
         can_view = frame.can_view(local_mappoints)
-        print('filter points:', len(local_mappoints), can_view.sum(),
-            len(self.preceding.mappoints()),
-            len(self.reference.mappoints()))
+        print('filter points:', len(local_mappoints), can_view.sum(), len(self.preceding.mappoints()), len(self.reference.mappoints()))
 
         checked = set()
         filtered = []

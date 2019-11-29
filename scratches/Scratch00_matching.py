@@ -1,10 +1,10 @@
 import g2o
-from Components.Camera import Camera
+from Params.Camera import Camera
 import numpy as np
-from Feature.ImageFeature import ImageFeature
+from Frames.ImageFeature import ImageFeature
 from Dataset.KITTIOdometry import KITTIOdometry
 from Params.params import ParamsKITTI
-from Components.StereoFrame import StereoFrame
+from Frames.StereoFrame import StereoFrame
 import cv2
 
 dataset = KITTIOdometry('~/Downloads/KITTI/sequences/00')

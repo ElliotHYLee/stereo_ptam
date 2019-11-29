@@ -1,17 +1,11 @@
 # pip libs
-import cv2
-import g2o
-import os
-import sys
-import argparse
-from threading import Thread
 
 # custom libs
 from Params.params import *
 from Dataset.KITTIOdometry import *
-from Components.Camera import *
-from Components.Frame import Frame
-from Feature.ImageFeature import *
+from Params.Camera import *
+from Frames.Frame import Frame
+from Frames.ImageFeature import *
 
 
 def main(dataset, params):

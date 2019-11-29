@@ -1,9 +1,9 @@
 # pip libs
-from threading import Lock, Thread
+from threading import Lock
 import numpy as np
 
 # custom libs
-from Covisibility.GraphMapPoint import GraphMapPoint
+from Mapping.MapPoint.GraphMapPoint import GraphMapPoint
 from collections import defaultdict
 
 

@@ -84,8 +84,7 @@ class CovisibilityGraph(object):
 
     def get_local_map(self, seedpoints, window_size=15):
         reference = self.get_reference_frame(seedpoints)
-        covisible = chain(
-            reference.covisibility_keyframes().items(), [(reference, float('inf'))])
+        covisible = chain(reference.covisibility_keyframes().items(), [(reference, float('inf'))])
         covisible = sorted(covisible, key=lambda _:_[1], reverse=True)
 
         local_map = [seedpoints]
@@ -106,8 +105,7 @@ class CovisibilityGraph(object):
         covisible = sum(covisible, Counter())
         for kf in set(seedframes):
             covisible[kf] = float('inf')
-        local = sorted(
-            covisible.items(), key=lambda _:_[1], reverse=True)
+        local = sorted(covisible.items(), key=lambda _:_[1], reverse=True)
 
         id = max([_.id for _ in covisible])
         loop_frames = [_ for _ in local if _[0].id < id-50]
@@ -115,9 +113,7 @@ class CovisibilityGraph(object):
         local = local[:window_size]
         loop_local = []
         if len(loop_frames) > 0:
-            loop_covisible = sorted(
-                loop_frames[0][0].covisibility_keyframes().items(),
-                key=lambda _:_[1], reverse=True)
+            loop_covisible = sorted(loop_frames[0][0].covisibility_keyframes().items(), key=lambda _:_[1], reverse=True)
 
             for kf, n in loop_covisible:
                 if kf not in set([_[0] for _ in local]):

@@ -1,16 +1,11 @@
 from sptam import *
-import cv2
 import g2o
-import os
-import sys
-import argparse
 from threading import Thread
-from Components.Camera import Camera
-from Components.StereoFrame import StereoFrame
-from Feature.ImageFeature import ImageFeature
-from Params.params import ParamsKITTI, ParamsEuroc
+from Params.Camera import Camera
+from Frames.StereoFrame import StereoFrame
+from Frames.ImageFeature import ImageFeature
+from Params.params import ParamsKITTI
 from Dataset.KITTIOdometry import KITTIOdometry
-from Dataset.EuRoCDataset import EuRoCDataset
 
 if __name__ == '__main__':
     # parser = argparse.ArgumentParser()
@@ -51,7 +46,7 @@ if __name__ == '__main__':
 
     ## the for loop
     durations = []
-    for i in range(0, 5):#len(dataset)):#3000]:
+    for i in range(0, 100):#len(dataset)):#3000]:
         featurel = ImageFeature(dataset.left[i], params)
         featurer = ImageFeature(dataset.right[i], params)
         timestamp = dataset.timestamps[i]

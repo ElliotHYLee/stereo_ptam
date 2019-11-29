@@ -4,14 +4,13 @@ import cv2
 import g2o
 from g2o.contrib import SmoothEstimatePropagator
 import time
-from threading import Thread, Lock
+from threading import Thread
 from queue import Queue
 from collections import defaultdict, namedtuple
 
 # custom libs
 from Optimization.PoseGraphOptimization import PoseGraphOptimization
-from Components.Measurement import Measurement
-from LoopClosure.NearestNeighbors import NearestNeighbors
+from Mapping.Measurement.Measurement import Measurement
 from LoopClosure.LoopDetection import LoopDetection
 
 class LoopClosing(object):
@@ -66,8 +65,7 @@ class LoopClosing(object):
             query_keyframe = keyframe
             match_keyframe = detected
 
-            result = match_and_estimate(
-                query_keyframe, match_keyframe, self.params)
+            result = match_and_estimate(query_keyframe, match_keyframe, self.params)
 
             if result is None:
                 continue
@@ -217,11 +215,9 @@ def match_and_estimate(query_keyframe, match_keyframe, params):
         match['pt'].append(match['measurements'][j].view)
 
     # query_keyframe's pose in match_keyframe's coordinates frame
-    T13, inliers13 = solve_pnp_ransac(
-        query['pt'], match['px'], match_keyframe.cam.intrinsic)
+    T13, inliers13 = solve_pnp_ransac(query['pt'], match['px'], match_keyframe.cam.intrinsic)
 
-    T31, inliers31 = solve_pnp_ransac(
-        match['pt'], query['px'], query_keyframe.cam.intrinsic)
+    T31, inliers31 = solve_pnp_ransac(match['pt'], query['px'], query_keyframe.cam.intrinsic)
 
     if T13 is None or T13 is None:
         return None
@@ -232,10 +228,8 @@ def match_and_estimate(query_keyframe, match_keyframe, params):
         return None
 
     n_inliers = len(set(inliers13) & set(inliers31))
-    query_pose = g2o.Isometry3d(
-        query_keyframe.orientation, query_keyframe.position)
-    match_pose = g2o.Isometry3d(
-        match_keyframe.orientation, match_keyframe.position)
+    query_pose = g2o.Isometry3d(query_keyframe.orientation, query_keyframe.position)
+    match_pose = g2o.Isometry3d(match_keyframe.orientation, match_keyframe.position)
 
     # TODO: combine T13 and T31
     constraint = T13
@@ -249,6 +243,11 @@ def match_and_estimate(query_keyframe, match_keyframe, params):
         match['measurements'], stereo_matches, n_matches, n_inliers)
 
 
+## me
+## guess: based on 3D in map and 2D features, calc. current frame's pose
+## Nov.27.2019
+## is this correct?
+##
 def solve_pnp_ransac(pts3d, pts, intrinsic_matrix):
     val, rvec, tvec, inliers = cv2.solvePnPRansac(
             np.array(pts3d), np.array(pts),

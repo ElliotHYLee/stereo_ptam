@@ -39,6 +39,8 @@ class ImageFeature(object):
         cv2.imshow(name, img)
         cv2.waitKey(delay)
 
+
+    ## return idces of mathced left and right descriptors
     def find_matches(self, predictions, descriptors):
         matches = dict()
         distances = defaultdict(lambda: float('inf'))

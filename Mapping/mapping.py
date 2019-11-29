@@ -1,16 +1,11 @@
 import numpy as np
-
 from queue import Queue
 from threading import Thread, Lock, Condition
 import time
-
 from itertools import chain
 from collections import defaultdict
-
 from Optimization.BundleAdjustment import LocalBA
-from Components.Measurement import Measurement
-
-
+from Mapping.Measurement.Measurement import Measurement
 
 class Mapping(object):
     def __init__(self, graph, params):
@@ -124,9 +119,6 @@ class Mapping(object):
         for pt in mappoints:
             if pt.is_bad():
                 self.graph.remove_mappoint(pt)
-
-
-
 
 class MappingThread(Mapping):
     def __init__(self, graph, params):

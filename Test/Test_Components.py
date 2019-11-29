@@ -1,18 +1,8 @@
 # pip libs
-import cv2
-import g2o
-import os
-import sys
-import argparse
-from threading import Thread
 
 # custom libs
-from Components.Camera import Camera
-from Components.StereoFrame import StereoFrame
-from Feature.ImageFeature import ImageFeature
-from Params.params import ParamsKITTI, ParamsEuroc
-from Dataset.KITTIOdometry import KITTIOdometry
-from Dataset.EuRoCDataset import EuRoCDataset
+from Params.Camera import Camera
+
 
 class Test_Components:
     def __init__(self, params, dataset):
