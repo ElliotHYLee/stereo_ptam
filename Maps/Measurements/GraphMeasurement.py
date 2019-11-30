@@ -11,5 +11,4 @@ class GraphMeasurement(object):
         return hash(self.id)
 
     def __eq__(self, rhs):
-        return (isinstance(rhs, GraphMeasurement) and
-            self.id == rhs.id)
+        return (isinstance(rhs, GraphMeasurement) and self.id == rhs.id)

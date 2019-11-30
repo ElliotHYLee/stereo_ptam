@@ -23,11 +23,7 @@ class PoseGraphOptimization(g2o.SparseOptimizer):
         v_se3.set_fixed(fixed)
         super().add_vertex(v_se3)
 
-    def add_edge(self, vertices,
-            measurement=None,
-            information=np.identity(6),
-            robust_kernel=None):
-
+    def add_edge(self, vertices, measurement=None, information=np.identity(6), robust_kernel=None):
         edge = g2o.EdgeSE3()
         for i, v in enumerate(vertices):
             if isinstance(v, int):
@@ -50,9 +46,7 @@ class PoseGraphOptimization(g2o.SparseOptimizer):
                 anchor = kf
 
         for i, kf in enumerate(keyframes):
-            pose = g2o.Isometry3d(
-                kf.orientation,
-                kf.position)
+            pose = g2o.Isometry3d(kf.orientation, kf.position)
 
             fixed = i == 0
             if anchor is not None:
@@ -60,15 +54,11 @@ class PoseGraphOptimization(g2o.SparseOptimizer):
             self.add_vertex(kf.id, pose, fixed=fixed)
 
             if kf.preceding_keyframe is not None:
-                self.add_edge(
-                    vertices=(kf.preceding_keyframe.id, kf.id),
-                    measurement=kf.preceding_constraint)
+                self.add_edge(vertices=(kf.preceding_keyframe.id, kf.id), measurement=kf.preceding_constraint)
 
             if (kf.reference_keyframe is not None and
                 kf.reference_keyframe != kf.preceding_keyframe):
-                self.add_edge(
-                    vertices=(kf.reference_keyframe.id, kf.id),
-                    measurement=kf.reference_constraint)
+                self.add_edge(vertices=(kf.reference_keyframe.id, kf.id), measurement=kf.reference_constraint)
 
         for kf, kf2, meas in loops:
             self.add_edge((kf.id, kf2.id), measurement=meas)

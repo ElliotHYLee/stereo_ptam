@@ -39,8 +39,9 @@ class CovisibilityGraph(object):
             except:
                 pass
 
-    def add_measurement(self, kf, pt, meas):
+    def add_measurement(self, kf, meas):
         with self._lock:
+            pt = meas.mappoint
             if kf not in self.kfs_set or pt not in self.pts:
                 return
 
@@ -100,15 +101,23 @@ class CovisibilityGraph(object):
 
     def get_local_map_v2(self, seedframes, window_size=12, loop_window_size=8):
         covisible = []
+
+        ## me
+        ## len(seedFrames)  = 2 always.
+        ## set(seedFrames) => 1 when reference frame == preceeding frame
+
         for kf in set(seedframes):
             covisible.append(Counter(kf.covisibility_keyframes()))
+
         covisible = sum(covisible, Counter())
+
+
         for kf in set(seedframes):
             covisible[kf] = float('inf')
-        local = sorted(covisible.items(), key=lambda _:_[1], reverse=True)
 
-        id = max([_.id for _ in covisible])
-        loop_frames = [_ for _ in local if _[0].id < id-50]
+        local = sorted(covisible.items(), key=lambda _:_[1], reverse=True)
+        id = max([kf.id for kf in covisible])
+        loop_frames = [kf for kf in local if kf[0].id < id-50]
 
         local = local[:window_size]
         loop_local = []

@@ -26,7 +26,7 @@ if __name__ == '__main__':
         # dataset = EuRoCDataset(args.path)
 
     params = ParamsKITTI()
-    dataset = KITTIOdometry('~/Downloads/KITTI/sequences/00')
+    dataset = KITTIOdometry('/mnt/F/KITTI/odom/dataset/sequences/00')
 
     ################
     # Prepare SPTAM main routine
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     ## the for loop
     durations = []
-    for i in range(0, 100):#len(dataset)):#3000]:
+    for i in range(0, 4000):#len(dataset)):#3000]:
         featurel = ImageFeature(dataset.left[i], params)
         featurer = ImageFeature(dataset.right[i], params)
         timestamp = dataset.timestamps[i]

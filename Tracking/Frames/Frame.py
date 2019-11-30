@@ -46,8 +46,7 @@ class Frame(object):
         self.position = self.pose.position()
 
         self.transform_matrix = self.pose.inverse().matrix()[:3]
-        self.projection_matrix = (
-            self.cam.intrinsic.dot(self.transform_matrix))
+        self.projection_matrix = (self.cam.intrinsic.dot(self.transform_matrix))
 
     def transform(self, points):    # from world coordinates
         '''

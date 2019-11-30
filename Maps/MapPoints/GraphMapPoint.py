@@ -13,10 +13,11 @@ class GraphMapPoint(object):
         return self.id
 
     def __eq__(self, rhs):
-        return (isinstance(rhs, GraphMapPoint) and
-            self.id == rhs.id)
+        return (isinstance(rhs, GraphMapPoint) and self.id == rhs.id)
+
     def __lt__(self, rhs):
         return self.id < rhs.id
+
     def __le__(self, rhs):
         return self.id <= rhs.id
 

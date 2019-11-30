@@ -1,8 +1,6 @@
 import numpy as np 
 import g2o
 
-
-
 class MotionModel(object):
     def __init__(self, 
             timestamp=None, 
@@ -93,7 +91,5 @@ class MotionModel(object):
         self.position = current.position()
         self.orientation = current.orientation()
 
-        self.v_linear = (
-            correction.inverse().orientation() * self.v_linear)
-        self.v_angular_axis = (
-            correction.inverse().orientation() * self.v_angular_axis)
+        self.v_linear = (correction.inverse().orientation() * self.v_linear)
+        self.v_angular_axis = (correction.inverse().orientation() * self.v_angular_axis)

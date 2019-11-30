@@ -9,8 +9,8 @@ from queue import Queue
 from collections import defaultdict, namedtuple
 
 # custom libs
-from Optimization.PoseGraphOptimization import PoseGraphOptimization
-from Maps.Measurement.Measurement import Measurement
+from LoopClosure.PoseGraphOptimization import PoseGraphOptimization
+from Maps.Measurements.Measurement import Measurement
 from LoopClosure.LoopDetection import LoopDetection
 
 class LoopClosing(object):

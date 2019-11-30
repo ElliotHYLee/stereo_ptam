@@ -15,8 +15,10 @@ class GraphKeyFrame(object):
     def __eq__(self, rhs):
         return (isinstance(rhs, GraphKeyFrame) and
             self.id == rhs.id)
+
     def __lt__(self, rhs):
         return self.id < rhs.id   # predate
+
     def __le__(self, rhs):
         return self.id <= rhs.id
 

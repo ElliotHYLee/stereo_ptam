@@ -6,12 +6,11 @@ from collections import defaultdict
 
 # custom libs
 from Maps.CovisibilityGraph import CovisibilityGraph
-from Optimization.BundleAdjustment import BundleAdjustment
-from Maps.mapping import MappingThread
-from Maps.Measurement.Measurement import Measurement
+from Tracking.BundleAdjustment import BundleAdjustment
+from Maps.graphcontroller import GraphControllerThread
+from Maps.Measurements.Measurement import Measurement
 from Tracking.motion import MotionModel
 from LoopClosure.LoopClosing import LoopClosing
-
 
 class Tracking(object):
     def __init__(self, params):
@@ -40,7 +39,7 @@ class SPTAM(object):
         self.motion_model = MotionModel()
 
         self.graph = CovisibilityGraph()
-        self.mapping = MappingThread(self.graph, params)
+        self.mapping = GraphControllerThread(self.graph, params)
 
         self.loop_closing = LoopClosing(self, params)
         self.loop_correction = None
@@ -56,18 +55,25 @@ class SPTAM(object):
             self.loop_closing.stop()
 
     def initialize(self, frame):
+        #list of MapPoint()
+        #list of Measurement()
         mappoints, measurements = frame.triangulate()
+
+        ## needs more than 10 3D points at least
         assert len(mappoints) >= self.params.init_min_points, ('Not enough points to initialize map.')
 
+        # make current frame as kf
         keyframe = frame.to_keyframe()
         keyframe.set_fixed(True)
         self.graph.add_keyframe(keyframe)
-        self.mapping.add_measurements(keyframe, mappoints, measurements)
-        if self.loop_closing is not None:
-            self.loop_closing.add_keyframe(keyframe)
+        self.mapping.add_measurements(keyframe, measurements)
 
-        self.reference = keyframe
-        self.preceding = keyframe
+        #if self.loop_closing is not None:
+        self.loop_closing.add_keyframe(keyframe)
+
+
+        self.reference = keyframe # given a set of mappoints, get most commom keyframe
+        self.preceding = keyframe # most recent keyframe
         self.current = keyframe
         self.status['initialized'] = True
 
@@ -84,28 +90,27 @@ class SPTAM(object):
         predicted_pose, _ = self.motion_model.predict_pose(frame.timestamp)
         frame.update_pose(predicted_pose)
 
-
-        if self.loop_closing is not None:
-            ## me
-            ## self.loop_correction will be updated by LoopClosing()
-            ## Nov.27.2019
-            if self.loop_correction is not None:
-                estimated_pose = g2o.Isometry3d(frame.orientation, frame.position)
-                estimated_pose = estimated_pose * self.loop_correction
-                frame.update_pose(estimated_pose)
-                self.motion_model.apply_correction(self.loop_correction)
-                self.loop_correction = None
+        #if self.loop_closing is not None:
+        ## me
+        ## self.loop_correction will be updated by LoopClosing()
+        ## Nov.27.2019
+        if self.loop_correction is not None:
+            estimated_pose = g2o.Isometry3d(frame.orientation, frame.position)
+            estimated_pose = estimated_pose * self.loop_correction
+            frame.update_pose(estimated_pose)
+            self.motion_model.apply_correction(self.loop_correction)
+            self.loop_correction = None
 
         ## me
         ## get matched features from the covis.graph (?) based on the current frame
-        ## receives list of MapPoint()
+        ## receives list of MapPoints()
         ## Nov.27.2019
         local_mappoints = self.filter_points(frame)
 
         ## me
         ## find mathces based on the current feature descriptors from MapPoints(3D)
         ## measurements = list of Measureemnt()
-        ## where Measurement(feature[i], dscriptr[i])
+        ## where Measurements(feature[i], dscriptr[i])
         ## measurement obj has point cloud based on the features
         measurements = frame.match_mappoints(local_mappoints, Measurement.Source.TRACKING)
 
@@ -125,7 +130,7 @@ class SPTAM(object):
             tracking_is_ok = True
         except:
             tracking_is_ok = False
-            print('tracking failed!!!')
+            print('tracking failed!!! ======================================')
 
         if tracking_is_ok and self.should_be_keyframe(frame, measurements):
             print('new keyframe', frame.idx)
@@ -134,15 +139,16 @@ class SPTAM(object):
             keyframe.update_preceding(self.preceding)
 
             self.mapping.add_keyframe(keyframe, measurements)
-            if self.loop_closing is not None:
-                self.loop_closing.add_keyframe(keyframe)
+            #if self.loop_closing is not None:
+            self.loop_closing.add_keyframe(keyframe)
             self.preceding = keyframe
         self.set_tracking(False)
 
     def filter_points(self, frame):
         local_mappoints = self.graph.get_local_map_v2([self.preceding, self.reference])[0]
         can_view = frame.can_view(local_mappoints)
-        print('filter points:', len(local_mappoints), can_view.sum(), len(self.preceding.mappoints()), len(self.reference.mappoints()))
+        print('filter points:', len(local_mappoints), can_view.sum(),
+              len(self.preceding.mappoints()), len(self.reference.mappoints()))
 
         checked = set()
         filtered = []

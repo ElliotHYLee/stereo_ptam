@@ -7,6 +7,7 @@ from Tracking.Frames.GraphKeyFrame import GraphKeyFrame
 
 class KeyFrame(GraphKeyFrame, StereoFrame):
 
+    ## static var.s
     _id = 0
     _id_lock = Lock()
 
@@ -45,4 +46,3 @@ class KeyFrame(GraphKeyFrame, StereoFrame):
 
     def set_fixed(self, fixed=True):
         self.fixed = fixed
-

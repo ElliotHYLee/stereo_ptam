@@ -4,10 +4,14 @@ from threading import Thread, Lock, Condition
 import time
 from itertools import chain
 from collections import defaultdict
-from Optimization.BundleAdjustment import LocalBA
-from Maps.Measurement.Measurement import Measurement
+from Tracking.BundleAdjustment import LocalBA
+from Maps.Measurements.Measurement import Measurement
 
-class Mapping(object):
+## me
+## these classes seem like controller for Covisibility()
+## NOv.29.2019
+
+class GraphController(object):
     def __init__(self, graph, params):
         self.graph = graph
         self.params = params
@@ -20,7 +24,7 @@ class Mapping(object):
         self.create_points(keyframe)
 
         for m in measurements:
-            self.graph.add_measurement(keyframe, m.mappoint, m)
+            self.graph.add_measurement(keyframe, m)
 
         self.local_keyframes.clear()
         self.local_keyframes.append(keyframe)
@@ -32,8 +36,7 @@ class Mapping(object):
         self.points_culling(self.local_keyframes)
 
     def fill(self, keyframes, keyframe):
-        covisible = sorted(
-            keyframe.covisibility_keyframes().items(), key=lambda _:_[1], reverse=True)
+        covisible = sorted(keyframe.covisibility_keyframes().items(), key=lambda _:_[1], reverse=True)
 
         for kf, n in covisible:
             if n > 0 and kf not in keyframes and self.is_safe(kf):
@@ -43,13 +46,13 @@ class Mapping(object):
 
     def create_points(self, keyframe):
         mappoints, measurements = keyframe.triangulate()
-        self.add_measurements(keyframe, mappoints, measurements)
+        self.add_measurements(keyframe, measurements)
 
-    def add_measurements(self, keyframe, mappoints, measurements):
-        for mappoint, measurement in zip(mappoints, measurements):
-            self.graph.add_mappoint(mappoint)
-            self.graph.add_measurement(keyframe, mappoint, measurement)
-            mappoint.increase_measurement_count()
+    def add_measurements(self, keyframe, measurements):
+        for measurement in measurements:
+            self.graph.add_mappoint(measurement.mappoint)
+            self.graph.add_measurement(keyframe, measurement)
+            measurement.mappoint.increase_measurement_count()
 
     def bundle_adjust(self, keyframes):
         adjust_keyframes = set()
@@ -106,7 +109,7 @@ class Mapping(object):
             measuremets = keyframe.match_mappoints(filtered, Measurement.Source.REFIND)
 
             for m in measuremets:
-                self.graph.add_measurement(keyframe, m.mappoint, m)
+                self.graph.add_measurement(keyframe, m)
                 m.mappoint.increase_measurement_count()
 
     def remove_measurements(self, measurements):
@@ -120,7 +123,7 @@ class Mapping(object):
             if pt.is_bad():
                 self.graph.remove_mappoint(pt)
 
-class MappingThread(Mapping):
+class GraphControllerThread(GraphController):
     def __init__(self, graph, params):
         super().__init__(graph, params)
 
@@ -140,7 +143,8 @@ class MappingThread(Mapping):
 
         self.create_points(keyframe)
         for m in measurements:
-            self.graph.add_measurement(keyframe, m.mappoint, m)
+            self.graph.add_measurement(keyframe, m)
+
 
         self._queue.put(keyframe)
         with self._requests_cv:

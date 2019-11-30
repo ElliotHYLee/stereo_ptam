@@ -6,8 +6,8 @@ from threading import Thread
 
 # custom libs
 from Tracking.Frames.Frame import Frame
-from Maps.Measurement.Measurement import Measurement
-from Maps.MapPoint.MapPoint import MapPoint
+from Maps.Measurements.Measurement import Measurement
+from Maps.MapPoints.MapPoint import MapPoint
 
 class StereoFrame(Frame):
     def __init__(self, idx, pose, feature, right_feature, cam, right_cam=None, timestamp=None, pose_covariance=np.identity(6)):
@@ -42,18 +42,17 @@ class StereoFrame(Frame):
                     continue   # TODO: choose one
 
                 meas = Measurement(Measurement.Type.STEREO,
-                                    source,
-                                    [self.left.get_keypoint(j), self.right.get_keypoint(j2)],
-                                    [self.left.get_descriptor(j), self.right.get_descriptor(j2)])
+                                   source,
+                                   [self.left.get_keypoint(j), self.right.get_keypoint(j2)],
+                                   [self.left.get_descriptor(j), self.right.get_descriptor(j2)])
                 measurements.append((i, meas))
                 self.left.set_matched(j)
                 self.right.set_matched(j2)
             else:
-                meas = Measurement(
-                    Measurement.Type.LEFT,
-                    source,
-                    [self.left.get_keypoint(j)],
-                    [self.left.get_descriptor(j)])
+                meas = Measurement(Measurement.Type.LEFT,
+                                    source,
+                                    [self.left.get_keypoint(j)],
+                                    [self.left.get_descriptor(j)])
                 measurements.append((i, meas))
                 self.left.set_matched(j)
 
@@ -111,21 +110,18 @@ class StereoFrame(Frame):
         px_right = np.array([kps_right[m.trainIdx].pt for m in matches])
 
         # print(self.left.projection_matrix)
-        # points in world coord
-        points = cv2.triangulatePoints(
-            self.left.projection_matrix, # 3D world to 2D img
-            self.right.projection_matrix,
-            px_left.transpose(),
-            px_right.transpose()).transpose()  # shape: (N, 4)
+        # points in global coord
+        points = cv2.triangulatePoints(self.left.projection_matrix, # 3D world_blogal to 2D img in body frame
+                                       self.right.projection_matrix,
+                                       px_left.transpose(),
+                                       px_right.transpose()).transpose()  # shape: (N, 4)
 
         points = points[:, :3] / points[:, 3:]
 
-        can_view = np.logical_and(
-            self.left.can_view(points),
-            self.right.can_view(points))
+        can_view = np.logical_and(self.left.can_view(points), self.right.can_view(points))
 
         mappoints = []
-        matchs = []
+        matchList = []
         for i, point in enumerate(points):
             if not can_view[i]:
                 continue
@@ -136,34 +132,38 @@ class StereoFrame(Frame):
 
             mappoint = MapPoint(point, normal, desps_left[matches[i].queryIdx], color)
             mappoints.append(mappoint)
-            matchs.append((matches[i].queryIdx, matches[i].trainIdx))
+            matchList.append((matches[i].queryIdx, matches[i].trainIdx))
 
-        return mappoints, matchs
+        return mappoints, matchList
 
     def update_pose(self, pose):
         super().update_pose(pose)
         self.right.update_pose(pose)
         self.left.update_pose(self.cam.compute_right_camera_pose(pose))
 
-    # batch version
     def can_view(self, mappoints):
         points = []
         point_normals = []
-        for i, p in enumerate(mappoints):
+
+        for p in mappoints:
             points.append(p.position)
             point_normals.append(p.normal)
         points = np.asarray(points)
-        point_normals = np.asarray(point_normals)
+        point_normals = np.asarray(point_normals) ## N by 3
 
         normals = points - self.position
         normals /= np.linalg.norm(normals, axis=-1, keepdims=True)
-        cos = np.clip(np.sum(point_normals * normals, axis=1), -1, 1)
+
+        dotOfNormals = np.sum(point_normals * normals, axis=1)
+        cos = np.clip(dotOfNormals, -1, 1)
         parallel = np.arccos(cos) < (np.pi / 4)
+        ## parallel: within 45 deg.
 
-        can_view = np.logical_or(
-            self.left.can_view(points),
-            self.right.can_view(points))
+        can_view = np.logical_or(self.left.can_view(points), self.right.can_view(points))
 
+        ## me
+        ## why AND-gate parallel? -> considering blocking?
+        ## Nov.29.2019
         return np.logical_and(parallel, can_view)
 
     def to_keyframe(self):
