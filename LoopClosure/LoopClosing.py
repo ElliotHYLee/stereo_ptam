@@ -156,13 +156,13 @@ class LoopClosing(object):
                                              Measurement.Source.REFIND,
                                              query_meas.get_keypoints(),
                                              query_meas.get_descriptors())
-                self.system.graph.add_measurement(query_keyframe, match_meas.mappoint, new_query_meas)
+                self.system.graph.add_measurement(query_keyframe, new_query_meas)
 
                 new_match_meas = Measurement(Measurement.Type.STEREO,
                                              Measurement.Source.REFIND,
                                              match_meas.get_keypoints(),
                                              match_meas.get_descriptors())
-                self.system.graph.add_measurement(match_keyframe, query_meas.mappoint, new_match_meas)
+                self.system.graph.add_measurement(match_keyframe,  new_match_meas)
 
             self.system.mapping.free_window()
             self.system.resume_adding_keyframes()

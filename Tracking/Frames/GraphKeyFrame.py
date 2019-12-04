@@ -45,6 +45,9 @@ class GraphKeyFrame(object):
         with self._lock:
             return self.covisible.copy()  # shallow copy
 
+    ## me
+    ## when adding measurement to graph, this key frame will be called and ++1 its counter
+    ## Nov.29.2019
     def add_covisibility_keyframe(self, kf):
         with self._lock:
             self.covisible[kf] += 1

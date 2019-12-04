@@ -52,7 +52,7 @@ class CovisibilityGraph(object):
                 m.keyframe.add_covisibility_keyframe(kf)
 
             meas.keyframe = kf
-            meas.mappoint = pt
+            #meas.mappoint = ptsss
             kf.add_measurement(meas)
             pt.add_measurement(meas)
 
@@ -100,36 +100,40 @@ class CovisibilityGraph(object):
         return local_map, local_keyframes
 
     def get_local_map_v2(self, seedframes, window_size=12, loop_window_size=8):
-        covisible = []
-
         ## me
         ## len(seedFrames)  = 2 always.
         ## set(seedFrames) => 1 when reference frame == preceeding frame
 
+        covisible = []
         for kf in set(seedframes):
             covisible.append(Counter(kf.covisibility_keyframes()))
 
+        # somehow counts the number of keyframes that see the same points
         covisible = sum(covisible, Counter())
-
+        # counter obj contains KeyFrame()
 
         for kf in set(seedframes):
             covisible[kf] = float('inf')
 
+        # in a nutshell, somehow get all keyframes near its preceeding and reference frames
+        # and sort by most often observed. In this way, no need to search by position for all map.
+        # It seems one of the key strength of the graph SLAM.
         local = sorted(covisible.items(), key=lambda _:_[1], reverse=True)
+
         id = max([kf.id for kf in covisible])
+
+        ##kf[0] is Counter()'s key  = keyframe
         loop_frames = [kf for kf in local if kf[0].id < id-50]
 
         local = local[:window_size]
         loop_local = []
         if len(loop_frames) > 0:
             loop_covisible = sorted(loop_frames[0][0].covisibility_keyframes().items(), key=lambda _:_[1], reverse=True)
-
             for kf, n in loop_covisible:
                 if kf not in set([_[0] for _ in local]):
                     loop_local.append((kf, n))
                     if len(loop_local) >= loop_window_size:
                         break
-
         local = chain(local, loop_local)
 
         local_map = []

@@ -18,17 +18,18 @@ class Tracking(object):
         self.min_measurements = params.pnp_min_measurements
         self.max_iterations = params.pnp_max_iterations
 
-    def refine_pose(self, pose, cam, measurements):
-        assert len(measurements) >= self.min_measurements, ('Not enough points')
+    ## me
+    ## given current predicted pose and current measurements from the map
+    ## correct the current pose.
 
+    def refine_pose(self, pose, cam, measurements):
+        assert len(measurements) >= self.min_measurements, ('Not enough points') ## at least 10 points
         self.optimizer.clear()
         self.optimizer.add_pose(0, pose, cam, fixed=False)
-
         for i, m in enumerate(measurements):
             self.optimizer.add_point(i, m.mappoint.position, fixed=True)
             self.optimizer.add_edge(0, i, 0, m)
-
-        self.optimizer.optimize(self.max_iterations)
+        self.optimizer.optimize(self.max_iterations) # iterate 10 times
         return self.optimizer.get_pose(0)
 
 class SPTAM(object):
@@ -71,12 +72,10 @@ class SPTAM(object):
         #if self.loop_closing is not None:
         self.loop_closing.add_keyframe(keyframe)
 
-
         self.reference = keyframe # given a set of mappoints, get most commom keyframe
         self.preceding = keyframe # most recent keyframe
         self.current = keyframe
         self.status['initialized'] = True
-
         self.motion_model.update_pose(frame.timestamp, frame.position, frame.orientation)
 
     def track(self, frame):
@@ -132,7 +131,7 @@ class SPTAM(object):
             tracking_is_ok = False
             print('tracking failed!!! ======================================')
 
-        if tracking_is_ok and self.should_be_keyframe(frame, measurements):
+        if tracking_is_ok and self.should_be_keyframe(measurements):
             print('new keyframe', frame.idx)
             keyframe = frame.to_keyframe()
             keyframe.update_reference(self.reference)
@@ -160,6 +159,7 @@ class SPTAM(object):
             filtered.append(pt)
             checked.add(pt)
 
+        ## as this frame is not determined as keyframe yet, map may not have the points.
         for reference in set([self.preceding, self.reference]):
             for pt in reference.mappoints():  # neglect can_view test
                 if pt in checked or pt.is_bad():
@@ -169,7 +169,7 @@ class SPTAM(object):
 
         return filtered
 
-    def should_be_keyframe(self, frame, measurements):
+    def should_be_keyframe(self, measurements):
         if self.adding_keyframes_stopped():
             return False
 

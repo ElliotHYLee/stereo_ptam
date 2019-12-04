@@ -15,12 +15,13 @@ class Measurement(GraphMeasurement):
 
         self.type = type
         self.source = source
-        self.keypoints = keypoints # features [left right]
+        self.keypoints = keypoints # cv2.'s key point. (u,v) [left right]
         self.descriptors = descriptors # dscrp [left, right]
         self.view = None    # mappoint's position in current coordinates frame
 
         self.xy = np.array(self.keypoints[0].pt)
         if self.is_stereo():
+            ## hmm. stereo's right y value is the same as left. thus, xyx
             self.xyx = np.array([*keypoints[0].pt, keypoints[1].pt[0]])
 
         self.triangulation = (source == self.Source.TRIANGULATION)

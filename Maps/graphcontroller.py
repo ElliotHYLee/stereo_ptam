@@ -145,7 +145,6 @@ class GraphControllerThread(GraphController):
         for m in measurements:
             self.graph.add_measurement(keyframe, m)
 
-
         self._queue.put(keyframe)
         with self._requests_cv:
             self._requests_cv.notify()
