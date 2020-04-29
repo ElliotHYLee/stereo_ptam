@@ -26,7 +26,8 @@ if __name__ == '__main__':
         # dataset = EuRoCDataset(args.path)
 
     params = ParamsKITTI()
-    dataset = KITTIOdometry('/mnt/F/KITTI/odom/dataset/sequences/00')
+    #dataset = KITTIOdometry('/mnt/F/KITTI/odom/dataset/sequences/00')
+    dataset = KITTIOdometry('/mnt/KITTI/odom/dataset/sequences/00')
 
     ################
     # Prepare SPTAM main routine
