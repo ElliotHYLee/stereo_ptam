@@ -27,7 +27,8 @@ if __name__ == '__main__':
 
     params = ParamsKITTI()
     #dataset = KITTIOdometry('/mnt/F/KITTI/odom/dataset/sequences/00')
-    dataset = KITTIOdometry('/mnt/KITTI/odom/dataset/sequences/00')
+    #dataset = KITTIOdometry('/mnt/KITTI/odom/dataset/sequences/00')
+    dataset = KITTIOdometry('KITTI/odom/dataset/sequences/00')
 
     ################
     # Prepare SPTAM main routine
