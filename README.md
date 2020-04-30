@@ -10,6 +10,10 @@ This is for docker.
 --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
 hylee101001/slam:sptam_env
 
+3. cd src #In the container
+4. sh run.sh
+
+
 ## example
 docker run -it --rm \
 --name con_sptam \
