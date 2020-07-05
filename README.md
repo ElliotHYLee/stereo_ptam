@@ -8,10 +8,7 @@ This is for docker.
 -v [abs/path/to/src:/home/src \
 -v [abs/path/to/KITTI]:/home/src/KITTI \
 --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
-hylee101001/slam:sptam_env
-
-3. cd src #In the container
-4. sh run.sh
+hylee101001/slam:sptam_env run.sh
 
 
 ## example
@@ -20,7 +17,7 @@ docker run -it --rm \
 -v ~/Github/stereo_ptam/src:/home/src \
 -v /mnt/hgfs/KITTI:/home/src/KITTI \
 --net=host --env="DISPLAY" --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
-hylee101001/slam:sptam_env
+hylee101001/slam:sptam_env run.sh
 
 
 ---------------------------------------------------------------------------------------
