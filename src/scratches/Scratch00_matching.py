@@ -4,10 +4,10 @@ import numpy as np
 from Tracking.Frames.ImageFeature import ImageFeature
 from Dataset.KITTIOdometry import KITTIOdometry
 from Params.params import ParamsKITTI
-from Tracking.Frames import StereoFrame
+from Tracking.Frames.StereoFrame import StereoFrame
 import cv2
 
-dataset = KITTIOdometry('~/Downloads/KITTI/sequences/00')
+dataset = KITTIOdometry('/mnt/hgfs/D/KITTI/odom/dataset/sequences/00')
 cam = Camera(718.856, 718.856, 607.1928, 185.2157, 1241, 376, 0.1, 1000, 0.5371657)
 params = ParamsKITTI()
 i = 0
