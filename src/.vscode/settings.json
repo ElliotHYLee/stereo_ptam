@@ -1,0 +1,17 @@
+{
+    "terminal.integrated.inheritEnv": false,
+    "workbench.colorCustomizations" : {
+        "terminal.foreground" : "#00f5e9",
+        "terminal.background" : "#000000"
+    },
+    "terminal.integrated.fontSize":16,
+    "editor.suggestSelection": "first",
+    "editor.fontSize":15,
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "workbench.colorTheme": "Monokai Pro",
+    "workbench.iconTheme": "material-icon-theme",
+    "python.languageServer": "Microsoft",
+    "terminal.integrated.fontFamily": "'inconsolata for powerline', 'operator mono'",
+    "terminal.integrated.fontWeightBold": "normal",
+    "python.pythonPath": "/home/el/miniconda3/envs/slam/bin/python",
+}
